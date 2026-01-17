@@ -1,0 +1,17 @@
+﻿using AutoMapper;
+using CatalogoHub.Domain.Entities;
+using CatalogoHub.api.Domain.DTOs;
+
+namespace CatalogoHub.api.Infrastructure.Mappings
+
+{
+    public class MappingProfile : Profile
+    {
+        public MappingProfile()
+        {
+            CreateMap<CreateFavoriteDto, UserFavorite>();
+
+            CreateMap<UserFavorite, FavoriteDto>();
+        }
+    }
+}
