@@ -23,13 +23,25 @@ O repositório está organizado da seguinte forma:
 
 ---
 
-##  Funcionalidades
+## ✨ Funcionalidades Atuais
 
 - **✅ Autenticação JWT**: Registro e login de usuários.
 - **✅ CRUD de Favoritos**: Gerenciamento completo de itens favoritos.
 - **✅ Integração RAWG**: Busca global de jogos.
 - **✅ Autorização**: Acesso restrito aos dados do próprio usuário.
 - **✅ CORS**: Configurado para comunicação segura com o frontend.
+
+---
+
+##  Próximas Funcionalidades (Roadmap)
+
+- [ ] **Integração com Jikan API**: Suporte completo para busca e favoritos de animes.
+- [ ] **Geração de PDF**: Relatórios de listas de favoritos usando **QuestPDF**.
+- [ ] **Sistema de Avaliação**: Notas e ratings personalizados para cada item.
+- [ ] **Filtros Avançados**: Ordenação por data, gênero e plataforma.
+- [ ] **Performance**: Implementação de cache distribuído com **Redis**.
+- [ ] **Infraestrutura**: Containerização do ambiente com **Docker**.
+- [ ] **Interface**: Desenvolvimento do Frontend moderno em **Next.js**.
 
 ---
 
@@ -45,7 +57,7 @@ O repositório está organizado da seguinte forma:
 
 1.  **Clone o repositório**
     ```bash
-    git clone <https://github.com/MuYukio/CatalogoHub/>
+    git clone <link-do-seu-repositorio>
     cd CatalogoHub
     ```
 
@@ -84,11 +96,29 @@ O repositório está organizado da seguinte forma:
     dotnet run
     ```
 
-6.  **Acesse o Swagger**
-    * Documentação: `http://localhost:5114/swagger`
+---
+
+##  Contribuição
+
+
+
+1. Faça um **Fork** do projeto.
+2. Crie uma **Branch** para sua Feature (`git checkout -b feature/NovaFeature`).
+3. Faça o **Commit** de suas mudanças (`git commit -m 'Add: Nova Feature'`).
+4. Faça o **Push** para a Branch (`git push origin feature/NovaFeature`).
+5. Abra um **Pull Request**.
 
 ---
 
-## 📝 Licença
+##  Autor
 
-Este projeto está sob a licença MIT.
+Desenvolvido para demonstrar competências técnicas em:
+* **ASP.NET Core Web API** (Arquitetura em Camadas)
+* **Integração de APIs Externas** e **Autenticação JWT**
+* **Entity Framework Core** & **PostgreSQL**
+
+---
+
+##  Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
