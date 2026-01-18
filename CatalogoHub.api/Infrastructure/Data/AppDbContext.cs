@@ -1,7 +1,8 @@
-﻿using CatalogoHub.Domain.Entities;
+﻿using CatalogoHub.api.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace CatalogoHub.Infrastructure.Data
+namespace CatalogoHub.api.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {
@@ -9,11 +10,16 @@ namespace CatalogoHub.Infrastructure.Data
             : base(options)
         {
         }
+        public DbSet<User> Users { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Configuração do relacionamento User ↔ Favorites
             modelBuilder.Entity<UserFavorite>()
-                .Property(f => f.CreatedAt)
-                .HasDefaultValueSql("NOW()");
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+          
         }
 
         public DbSet<UserFavorite> UserFavorites { get; set; }

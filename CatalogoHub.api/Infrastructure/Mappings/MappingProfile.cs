@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using CatalogoHub.Domain.Entities;
+using CatalogoHub.api.Domain.Entities;
 using CatalogoHub.api.Domain.DTOs;
+
 
 namespace CatalogoHub.api.Infrastructure.Mappings
 
@@ -9,7 +10,8 @@ namespace CatalogoHub.api.Infrastructure.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<CreateFavoriteDto, UserFavorite>();
+            CreateMap<CreateFavoriteDto, UserFavorite>()
+           .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             CreateMap<UserFavorite, FavoriteDto>();
         }
