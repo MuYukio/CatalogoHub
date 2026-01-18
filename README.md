@@ -23,7 +23,7 @@ O repositório está organizado da seguinte forma:
 
 ---
 
-## ✨ Funcionalidades Atuais
+##  Funcionalidades Atuais
 
 - **✅ Autenticação JWT**: Registro e login de usuários.
 - **✅ CRUD de Favoritos**: Gerenciamento completo de itens favoritos.
