@@ -1,7 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CatalogoHub.api.Infrastructure.Swagger
 {
@@ -10,9 +8,9 @@ namespace CatalogoHub.api.Infrastructure.Swagger
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-                .Union(context.MethodInfo.GetCustomAttributes(true))
-                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>()
-                .Any();
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any()
+                || context.MethodInfo.GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any();
 
             if (hasAuthorize)
             {
