@@ -62,21 +62,24 @@ O CatalogoHub e uma solucao backend robusta que permite aos usuarios catalogar s
 ### Instalacao e Execucao
 
 1. Clonar o Repositorio
+   ```
     git clone https://github.com/MuYukio/CatalogoHub.git
     cd CatalogoHub
 
-2. Configurar o Banco de Dados
+3. Configurar o Banco de Dados
     Voce pode utilizar um banco local ou via Docker:
 
     Opcao via Docker:
+   ```
     docker run --name catalogohub-db -e POSTGRES_PASSWORD=senha -p 5432:5432 -d postgres:15
-
-    Opcao Local:
+   ```
+   Opcao Local:
+  ```
     createdb CatalogoHubDb
-
-3. Variaveis de Ambiente
+  ```
+5. Variaveis de Ambiente
     Edite o arquivo backend/CatalogoHub.api/appsettings.Development.json com suas credenciais:
-
+```
     {
       "ConnectionStrings": {
         "DefaultConnection": "Host=localhost;Port=5432;Database=CatalogoHubDb;Username=postgres;Password=sua_senha"
@@ -92,21 +95,22 @@ O CatalogoHub e uma solucao backend robusta que permite aos usuarios catalogar s
         }
       }
     }
-
-4. Migrations e Execucao
+```
+6. Migrations e Execucao
+```
     cd backend/CatalogoHub.api
     dotnet ef database update
     dotnet run
-
+```
 ---
 
 ## Documentacao da API
 
 Apos iniciar a aplicacao, os enderecos de acesso sao:
-
+```
 - Swagger UI: http://localhost:5114/swagger
 - API Base: http://localhost:5114/api
-
+```
 ---
 
 ## Licenca
