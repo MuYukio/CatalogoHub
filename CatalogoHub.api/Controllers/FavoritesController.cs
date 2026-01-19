@@ -2,6 +2,7 @@
 using CatalogoHub.api.Domain.DTOs;
 using CatalogoHub.api.Domain.Entities;
 using CatalogoHub.api.Infrastructure.Data;
+using CatalogoHub.api.Infrastructure.Pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace CatalogoHub.api.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<FavoritesController> _logger;
 
-        public FavoritesController(AppDbContext context,IMapper mapper)
+        public FavoritesController(AppDbContext context,IMapper mapper, ILogger<FavoritesController> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
         // GET: api/favorites
@@ -60,6 +63,11 @@ namespace CatalogoHub.api.Controllers
         public async Task<ActionResult<FavoriteDto>> CreateFavorite(
         [FromBody] CreateFavoriteDto createDto)
         {
+            if (createDto.Type != "Game" && createDto.Type != "Anime")
+            {
+                return BadRequest(new { message = "Type must be 'Game' or 'Anime'" });
+            }
+
             // 1. Validação
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -88,6 +96,101 @@ namespace CatalogoHub.api.Controllers
                 favoriteDto);
         }
 
+        [HttpGet("type/{type}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetFavoritesByType(string type)
+        {
+            if (type != "Game" && type != "Anime")
+                return BadRequest(new { message = "Type must be 'Game' or 'Anime'" });
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("Usuário não autenticado");
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var favorites = await _context.UserFavorites
+                .Where(f => f.UserId == userId && f.Type == type)
+                .OrderByDescending(f => f.CreatedAt)
+                .Select(f => new FavoriteDto
+                {
+                    Id = f.Id,
+                    UserId = f.UserId,
+                    ExternalId = f.ExternalId,
+                    Type = f.Type,
+                    Title = f.Title,
+                    ImageUrl = f.ImageUrl,
+                    CreatedAt = f.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(favorites);
+        }
+        [HttpGet("pdf")]
+        [Authorize]
+        [ProducesResponseType(typeof(FileContentResult), 200)]
+        [ProducesResponseType(typeof(object), 401)]
+        [ProducesResponseType(typeof(object), 500)]
+        public async Task<IActionResult> GenerateFavoritesPdf()
+        {
+            try
+            {
+                // 1. Pegar UserId do token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized(new { message = "Usuário não autenticado" });
+
+                var userId = int.Parse(userIdClaim.Value);
+                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "Usuário";
+
+                // 2. Buscar favoritos do usuário
+                var favorites = await _context.UserFavorites
+                    .Where(f => f.UserId == userId)
+                    .OrderByDescending(f => f.CreatedAt)
+                    .ToListAsync();
+
+                // 3. Preparar dados para PDF
+                var pdfData = new FavoritesPdfDto
+                {
+                    UserEmail = userEmail,
+                    GeneratedAt = DateTime.UtcNow,
+                    Items = favorites.Select(f => new FavoritePdfItemDto
+                    {
+                        Id = f.Id,
+                        Title = f.Title,
+                        Type = f.Type,
+                        ImageUrl = f.ImageUrl,
+                        AddedDate = f.CreatedAt,
+                        ExternalId = f.ExternalId
+                    }).ToList(),
+                    Summary = new SummaryDto
+                    {
+                        TotalItems = favorites.Count,
+                        GamesCount = favorites.Count(f => f.Type == "Game"),
+                        AnimesCount = favorites.Count(f => f.Type == "Anime"), // ← AGORA EXISTE
+                        OldestItem = favorites.Any() ? favorites.Min(f => f.CreatedAt) : (DateTime?)null,
+                        NewestItem = favorites.Any() ? favorites.Max(f => f.CreatedAt) : (DateTime?)null
+                    }
+                };
+
+                // 4. Gerar PDF
+                var pdfService = new PdfService();
+                var pdfBytes = pdfService.GenerateFavoritesPdf(pdfData);
+
+                // 5. Retornar arquivo para download
+                var fileName = $"CatalogoHub_Favoritos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+                return File(pdfBytes, "application/pdf", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao gerar PDF de favoritos"); // ← Use _logger
+                return StatusCode(500, new
+                {
+                    message = "Erro ao gerar PDF",
+                    error = ex.Message
+                });
+            }
+        }
         // DELETE: api/favorites/{id}
         [Authorize]
         [HttpDelete("{id}")]

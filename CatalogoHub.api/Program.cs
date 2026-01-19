@@ -1,11 +1,12 @@
 ﻿using CatalogoHub.api.Infrastructure.Auth;
-using CatalogoHub.api.Infrastructure.ExternalApis;
 using CatalogoHub.api.Infrastructure.Data;
+using CatalogoHub.api.Infrastructure.ExternalApis;
 using CatalogoHub.api.Infrastructure.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using System.Text;
 
 
@@ -27,16 +28,12 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RawgService>();
+builder.Services.AddScoped<JikanService>();
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "CatalogoHub API",
-        Version = "v1",
-        Description = "API para gerenciamento de favoritos de jogos e animes"
-    });
-
+   
     // Configuração de segurança SIMPLIFICADA e compatível
     var securityScheme = new OpenApiSecurityScheme
     {
@@ -51,6 +48,7 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityDefinition("Bearer", securityScheme);
 
     // Forma ALTERNATIVA que funciona com qualquer versão
+
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
@@ -95,6 +93,14 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
+
+builder.Services.AddHttpClient<JikanService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.jikan.moe/v4/");
+    client.DefaultRequestHeaders.Add("User-Agent", "CatalogoHub/1.0");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 
 var app = builder.Build();
 
