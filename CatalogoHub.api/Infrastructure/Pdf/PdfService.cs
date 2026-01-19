@@ -32,7 +32,7 @@ namespace CatalogoHub.api.Infrastructure.Pdf
                         .Column(column =>
                         {
                             column.Item()
-                                .Text("📚 CatalogoHub - Lista de Favoritos")
+                                .Text("CatalogoHub - Lista de Favoritos")
                                 .FontSize(16).Bold().FontColor(Colors.Blue.Darken3);
 
                             column.Item()
