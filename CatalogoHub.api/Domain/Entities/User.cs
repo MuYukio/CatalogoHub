@@ -7,11 +7,11 @@ namespace CatalogoHub.api.Domain.Entities //REPRESENTA UM USARIO NO BANCO
     {
         public int Id { get; set; }
         
-        [Required, EmailAddress]
-        public string Email { get; set; }
+        [EmailAddress]
+        public  required string Email { get; set; }
 
-        [Required,MinLength(6)]
-        public string PasswordHash { get; set; }
+        [MinLength(6)]
+        public required string PasswordHash { get; set; }
 
         public DateTime CreatedAt { get; set; } =  DateTime.UtcNow;
 

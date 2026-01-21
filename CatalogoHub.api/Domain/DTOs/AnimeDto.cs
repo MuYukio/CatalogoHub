@@ -8,9 +8,9 @@
         public string TitleJapanese { get; set; } = string.Empty;
         public string Synopsis { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
-        public decimal Score { get; set; }
+        public decimal? Score { get; set; }
         public string Type { get; set; } = string.Empty;
-        public int Episodes { get; set; }
+        public int? Episodes { get; set; }
         public string Status { get; set; } = string.Empty;
         public List<string> Genres { get; set; } = new();
     }

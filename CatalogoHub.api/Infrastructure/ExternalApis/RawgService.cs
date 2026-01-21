@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using AutoMapper;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CatalogoHub.api.Infrastructure.ExternalApis
@@ -8,12 +9,14 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMapper _mapper;
 
-        public RawgService(HttpClient httpClient, IConfiguration configuration)
+        public RawgService(HttpClient httpClient, IConfiguration configuration, IMapper mapper)
         {
             _httpClient = httpClient;
             _apiKey = configuration["ExternalApis:Rawg:ApiKey"];
             _httpClient.BaseAddress = new Uri("https://api.rawg.io/api/");
+            _mapper = mapper;
 
             _jsonOptions = new JsonSerializerOptions
             {
@@ -38,21 +41,7 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
                 if (result?.Results == null)
                     return new List<GameDto>();
 
-                return result.Results.Select(g => new GameDto
-                {
-                    Id = g.Id,
-                    Name = g.Name,
-                    Released = g.Released,
-                    BackgroundImage = g.BackgroundImage,
-                    Rating = g.Rating,
-                    Platforms = g.Platforms?
-                        .Where(p => p?.Platform != null)
-                        .Select(p => p.Platform.Name)
-                        .ToList() ?? new List<string>(),
-                    Genres = g.Genres?
-                        .Select(g => g.Name)
-                        .ToList() ?? new List<string>()
-                }).ToList();
+                return result.Results.Select(g => _mapper.Map<GameDto>(g)).ToList();
             }
             catch (Exception ex)
             {
@@ -76,21 +65,7 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
                 if (game == null)
                     return null;
 
-                return new GameDto
-                {
-                    Id = game.Id,
-                    Name = game.Name,
-                    Released = game.Released,
-                    BackgroundImage = game.BackgroundImage,
-                    Rating = game.Rating,
-                    Platforms = game.Platforms?
-                        .Where(p => p?.Platform != null)
-                        .Select(p => p.Platform.Name)
-                        .ToList() ?? new List<string>(),
-                    Genres = game.Genres?
-                        .Select(g => g.Name)
-                        .ToList() ?? new List<string>()
-                };
+                return _mapper.Map<GameDto>(game);
             }
             catch (Exception ex)
             {

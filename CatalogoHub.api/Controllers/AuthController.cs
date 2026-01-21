@@ -1,4 +1,5 @@
-﻿using CatalogoHub.api.Domain.DTOs;
+﻿using AutoMapper;
+using CatalogoHub.api.Domain.DTOs;
 using CatalogoHub.api.Domain.Entities;
 using CatalogoHub.api.Infrastructure.Auth;
 using CatalogoHub.api.Infrastructure.Data;
@@ -15,11 +16,13 @@ namespace CatalogoHub.api.Controllers // registro e login
     {
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
+        private readonly IMapper _mapper;
 
-        public AuthController(AppDbContext context, JwtService jwtService)
+        public AuthController(AppDbContext context, JwtService jwtService, IMapper mapper)
         {
             _context = context;
             _jwtService = jwtService;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -46,12 +49,7 @@ namespace CatalogoHub.api.Controllers // registro e login
             {
                 Token = token,
                 ExpiresAt = DateTime.UtcNow.AddHours(2),
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    CreatedAt = user.CreatedAt
-                }
+                User = _mapper.Map<UserDto>(user)
             };
         }
 
@@ -70,12 +68,7 @@ namespace CatalogoHub.api.Controllers // registro e login
             {
                 Token = token,
                 ExpiresAt = DateTime.UtcNow.AddHours(2),
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    CreatedAt = user.CreatedAt
-                }
+                User = _mapper.Map<UserDto>(user)
             };
         }
 
