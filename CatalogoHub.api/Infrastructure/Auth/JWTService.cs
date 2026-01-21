@@ -15,9 +15,12 @@ namespace CatalogoHub.api.Infrastructure.Auth //fabrica os tokens
 
         public JwtService(IConfiguration configuration)
         {
-            _secretKey = configuration["Jwt:Key"];
-            _issuer = configuration["Jwt:Issuer"];
-            _audience = configuration["Jwt:Audience"];
+            _secretKey = configuration["Jwt:Key"] ??
+                throw new InvalidOperationException("JWT Key not configured");
+            _issuer = configuration["Jwt:Issuer"] ??
+                throw new InvalidOperationException("JWT Issuer not configured");
+            _audience = configuration["Jwt:Audience"] ??
+                throw new InvalidOperationException("JWT Audience not configured");
         }
 
         public string GenerateToken(User user)

@@ -1,4 +1,5 @@
-﻿using CatalogoHub.api.Domain.DTOs;
+﻿using AutoMapper;
+using CatalogoHub.api.Domain.DTOs;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,8 +11,10 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
         private readonly HttpClient _httpClient;
         private readonly ILogger<JikanService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMapper _mapper;
 
-        public JikanService(HttpClient httpClient, ILogger<JikanService> logger)
+
+        public JikanService(HttpClient httpClient, ILogger<JikanService> logger, IMapper mapper)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -20,6 +23,7 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
             {
                 PropertyNameCaseInsensitive = true
             };
+            _mapper = mapper;
         }
         public async Task<AnimeSearchResponseDto> SearchAnimesAsync(string query, int page = 1)
         {
@@ -28,7 +32,7 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
 
                 await Task.Delay(1000);
                 var url = $"anime?q={Uri.EscapeDataString(query)}&page={page}&limit=20";
-                _logger.LogInformation("Requesting Jikan API: {Url}");
+                _logger.LogInformation("Requesting Jikan API: {Url}",url);
 
                 var response = await _httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
@@ -76,7 +80,7 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
                 await Task.Delay(1000);
 
                 var url = $"anime/{MalId}/full";
-                _logger.LogInformation("Requesting Jikan API details: {Url}");
+                _logger.LogInformation("Requesting Jikan API details: {Url}",url);
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -148,13 +152,13 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
         public AnimeImages? Images { get; set; } = new();
 
         [JsonPropertyName("score")]
-        public decimal Score { get; set; }
+        public decimal? Score { get; set; }
 
         [JsonPropertyName("type")]
         public string Type { get; set; } = string.Empty;
         
         [JsonPropertyName("episodes")]
-        public int Episodes { get; set; }
+        public int? Episodes { get; set; }
 
         [JsonPropertyName("status")]
         public string Status { get; set; } = string.Empty;

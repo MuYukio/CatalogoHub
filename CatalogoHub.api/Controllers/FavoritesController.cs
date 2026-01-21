@@ -40,19 +40,9 @@ namespace CatalogoHub.api.Controllers
 
             // 2. Filtra APENAS os favoritos do usuário logado
             var favorites = await _context.UserFavorites
-                .Where(f => f.UserId == userId) // ← FILTRO IMPORTANTE!
-                .OrderByDescending(f => f.CreatedAt)
-                .Select(f => new FavoriteDto
-                {
-                    Id = f.Id,
-                    UserId = f.UserId,
-                    ExternalId = f.ExternalId,
-                    Type = f.Type,
-                    Title = f.Title,
-                    ImageUrl = f.ImageUrl,
-                    CreatedAt = f.CreatedAt
-                })
-                .ToListAsync();
+                 .Where(f => f.UserId == userId)
+                 .OrderByDescending(f => f.CreatedAt)
+                 .ToListAsync();
 
             return Ok(favorites);
         }
@@ -81,7 +71,7 @@ namespace CatalogoHub.api.Controllers
 
             // 3. Mapear DTO → Entidade
             var favorite = _mapper.Map<UserFavorite>(createDto);
-            favorite.UserId = userId; // ← ATRIBUIÇÃO MANUAL
+            favorite.UserId = userId; 
 
             // 4. Salvar
             _context.UserFavorites.Add(favorite);
@@ -110,19 +100,9 @@ namespace CatalogoHub.api.Controllers
             var userId = int.Parse(userIdClaim.Value);
 
             var favorites = await _context.UserFavorites
-                .Where(f => f.UserId == userId && f.Type == type)
-                .OrderByDescending(f => f.CreatedAt)
-                .Select(f => new FavoriteDto
-                {
-                    Id = f.Id,
-                    UserId = f.UserId,
-                    ExternalId = f.ExternalId,
-                    Type = f.Type,
-                    Title = f.Title,
-                    ImageUrl = f.ImageUrl,
-                    CreatedAt = f.CreatedAt
-                })
-                .ToListAsync();
+    .Where(f => f.UserId == userId && f.Type == type)
+    .OrderByDescending(f => f.CreatedAt)
+    .ToListAsync();
 
             return Ok(favorites);
         }
@@ -167,7 +147,7 @@ namespace CatalogoHub.api.Controllers
                     {
                         TotalItems = favorites.Count,
                         GamesCount = favorites.Count(f => f.Type == "Game"),
-                        AnimesCount = favorites.Count(f => f.Type == "Anime"), // ← AGORA EXISTE
+                        AnimesCount = favorites.Count(f => f.Type == "Anime"), 
                         OldestItem = favorites.Any() ? favorites.Min(f => f.CreatedAt) : (DateTime?)null,
                         NewestItem = favorites.Any() ? favorites.Max(f => f.CreatedAt) : (DateTime?)null
                     }

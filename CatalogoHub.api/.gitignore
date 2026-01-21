@@ -1,169 +1,68 @@
-## .NET ##
-## https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
-
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-
-# Visual Studio 2015/2017 cache/options directory
+# Crie ou atualize o .gitignore na raiz
+cat > .gitignore << 'EOF'
+## Visual Studio e VS Code
 .vs/
-
-# User-specific files
-*.rsuser
+.vscode/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
+## Build results
 [Bb]in/
 [Oo]bj/
-[Ll]og/
+[Bb]uild/
+[Bb]uilds/
+*.exe
+*.dll
+*.pdb
+*.cache
 
-# .NET Core
+## .NET Core
 project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Files built by Visual Studio
-*_i.c
-*_p.c
-*_h.h
-*.ilk
-*.meta
-*.obj
-*.iobj
-*.pch
-*.pdb
-*.ipdb
-*.pgc
-*.pgd
-*.rsp
-*.sbr
-*.tlb
-*.tli
-*.tlh
-*.tmp
-*.tmp_proj
-*_wpftmp.csproj
-*.log
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.svclog
-*.scc
-
-# Chutzpah Test files
-_Chutzpah*
-
-# NuGet Packages
+## NuGet
 *.nupkg
-*.snupkg
+packages/
+.nuget/
 
-# The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
-# except build/, which is used as an MSBuild target.
-!packages/build/
-# Uncomment if necessary however generally it will be regenerated when required
-#!packages/repositories.config
-# NuGet v3's project.json files produces more ignorable files
-nuget*.cache
+## Rider
+.idea/
+*.sln.iml
 
-# Microsoft Azure Build Output
-csx/
-*.build.csdef
+## User-specific files
+*.rsuser
+*.userprefs
 
-# Microsoft Azure Emulator
-ecf/
-rcf/
-
-# Windows Store app package directories and files
-AppPackages/
-BundleArtifacts/
-Package.StoreAssociation.xml
-_pkginfo.txt
-*.appx
-*.appxbundle
-*.appxupload
-
-# Visual Studio cache files
-# files ending in .cache can be ignored
-*.[Cc]ache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
-
-# Others
-ClientBin/
-~$*
-*~
-*.dbmdl
-*.dbproj.schemaview
-*.jfm
-*.pfx
-*.publishsettings
-orleans.codegen.cs
-
-# Backup folder for Package Reference Convert tool in Visual Studio 2017
-MigrationBackup/
-
-# Ionide (cross platform F# VS Code tools) working directory
-.ionide/
-
-# Fody - auto-generated XML schema
-FodyWeavers.xsd
-
-# End of https://www.toptal.com/developers/gitignore/api/visualstudio
-
-## Custom ##
-# Configurações sensíveis
+## Arquivos sensíveis - NUNCA commitar!
 appsettings.Development.json
 appsettings.Production.json
 appsettings.Staging.json
 appsettings.Local.json
-
-# Secrets
+appsettings.Private.json
 secrets.json
 *.secret
 
-# IDE
-.vscode/
-.idea/
+## Logs e temp
+*.log
 *.swp
 *.swo
+*~
 
-# Sistema operacional
-Thumbs.db
+## OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Logs
-*.log
-logs/
+## Fontes do QuestPDF
+LatoFont/
+EOF
 
-# Temp files
-*.tmp
-*.temp
-
-# Docker
-docker-compose.override.yml
+# Adicione ao Git
+git add .gitignore
