@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CatalogoHub.api.Domain.DTOs;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -10,13 +12,15 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
         private readonly string _apiKey;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly IMapper _mapper;
+        private readonly ILogger<RawgService> _logger;
 
-        public RawgService(HttpClient httpClient, IConfiguration configuration, IMapper mapper)
+        public RawgService(HttpClient httpClient, IConfiguration configuration, IMapper mapper, ILogger<RawgService> logger)
         {
             _httpClient = httpClient;
-            _apiKey = configuration["ExternalApis:Rawg:ApiKey"];
+            _apiKey = configuration["ExternalApis:Rawg:ApiKey"] ?? "c73db05cc23e4c69af1418a24e3883cd";
             _httpClient.BaseAddress = new Uri("https://api.rawg.io/api/");
             _mapper = mapper;
+            _logger = logger;
 
             _jsonOptions = new JsonSerializerOptions
             {
@@ -41,11 +45,28 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
                 if (result?.Results == null)
                     return new List<GameDto>();
 
-                return result.Results.Select(g => _mapper.Map<GameDto>(g)).ToList();
+                var games = new List<GameDto>();
+                foreach (var rawgGame in result.Results)
+                {
+                    var gameDto = _mapper.Map<GameDto>(rawgGame);
+                    gameDto.IsAdultContent = IsAdultGame(rawgGame);
+
+                    // Adicionar content warnings se for adulto
+                    if (gameDto.IsAdultContent)
+                    {
+                        gameDto.ContentWarnings.Add("Adult Content");
+                        if (rawgGame.EsrbRating != null)
+                            gameDto.ContentWarnings.Add($"ESRB: {rawgGame.EsrbRating.Name}");
+                    }
+
+                    games.Add(gameDto);
+                }
+
+                return games;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in SearchGamesAsync: {ex.Message}");
+                _logger.LogError(ex, "Error in SearchGamesAsync");
                 return new List<GameDto>();
             }
         }
@@ -60,18 +81,131 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var game = JsonSerializer.Deserialize<RawgGame>(json, _jsonOptions);
+                var rawgGame = JsonSerializer.Deserialize<RawgGame>(json, _jsonOptions);
 
-                if (game == null)
+                if (rawgGame == null)
                     return null;
 
-                return _mapper.Map<GameDto>(game);
+                var gameDto = _mapper.Map<GameDto>(rawgGame);
+                gameDto.IsAdultContent = IsAdultGame(rawgGame);
+
+                if (gameDto.IsAdultContent)
+                {
+                    gameDto.ContentWarnings.Add("Adult Content");
+                    if (rawgGame.EsrbRating != null)
+                        gameDto.ContentWarnings.Add($"ESRB: {rawgGame.EsrbRating.Name}");
+                }
+
+                return gameDto;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetGameDetailsAsync: {ex.Message}");
+                _logger.LogError(ex, "Error in GetGameDetailsAsync");
                 return null;
             }
+        }
+
+        public async Task<List<GameDto>> GetRecentlyReleasedGamesAsync(int limit = 5)
+        {
+            try
+            {
+                // Buscar jogos lançados nos últimos 6 meses (não futuros)
+                var sixMonthsAgo = DateTime.Now.AddMonths(-6).ToString("yyyy-MM-dd");
+                var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+
+                var url = $"games?key={_apiKey}&dates={sixMonthsAgo},{currentDate}&ordering=-released,-rating&page_size={limit}";
+                var response = await _httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<RawgSearchResponse>(content, _jsonOptions);
+
+                if (result?.Results == null)
+                    return new List<GameDto>();
+
+                var games = new List<GameDto>();
+                foreach (var rawgGame in result.Results)
+                {
+                    var gameDto = _mapper.Map<GameDto>(rawgGame);
+                    gameDto.IsAdultContent = IsAdultGame(rawgGame);
+
+                    if (gameDto.IsAdultContent)
+                    {
+                        gameDto.ContentWarnings.Add("Adult Content");
+                        if (rawgGame.EsrbRating != null)
+                            gameDto.ContentWarnings.Add($"ESRB: {rawgGame.EsrbRating.Name}");
+                    }
+
+                    games.Add(gameDto);
+                }
+
+                return games;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recent games");
+                return new List<GameDto>();
+            }
+        }
+
+        public async Task<List<GameDto>> GetPopularGamesAsync(int page = 1, int pageSize = 20)
+        {
+            try
+            {
+                var url = $"games?key={_apiKey}&ordering=-rating&page={page}&page_size={pageSize}";
+                var response = await _httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<RawgSearchResponse>(content, _jsonOptions);
+
+                if (result?.Results == null)
+                    return new List<GameDto>();
+
+                var games = new List<GameDto>();
+                foreach (var rawgGame in result.Results)
+                {
+                    var gameDto = _mapper.Map<GameDto>(rawgGame);
+                    gameDto.IsAdultContent = IsAdultGame(rawgGame);
+
+                    if (gameDto.IsAdultContent)
+                    {
+                        gameDto.ContentWarnings.Add("Adult Content");
+                        if (rawgGame.EsrbRating != null)
+                            gameDto.ContentWarnings.Add($"ESRB: {rawgGame.EsrbRating.Name}");
+                    }
+
+                    games.Add(gameDto);
+                }
+
+                return games;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting popular games");
+                return new List<GameDto>();
+            }
+        }
+
+        private bool IsAdultGame(RawgGame game)
+        {
+            // Verificar ESRB rating
+            var adultEsrbRatings = new[] { "Mature", "Adults Only", "Rating Pending" };
+            if (game.EsrbRating != null && adultEsrbRatings.Contains(game.EsrbRating.Name))
+                return true;
+
+            // Verificar gêneros adultos
+            var adultGenres = new[] { "Adult", "Erotic", "Hentai", "NSFW", "Gore", "Violent", "Horror", "Sexual Content" };
+            if (game.Genres != null && game.Genres.Any(g => adultGenres.Contains(g.Name, StringComparer.OrdinalIgnoreCase)))
+                return true;
+
+            // Verificar no nome (heurística simples)
+            var adultKeywords = new[] { "BDSM", "Hentai", "Porn", "Sex", "XXX", "Lewd", "18+", "Adult" };
+            if (adultKeywords.Any(keyword =>
+                game.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+                return true;
+
+            return false;
         }
     }
 
@@ -104,6 +238,15 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
 
         [JsonPropertyName("genres")]
         public List<Genre> Genres { get; set; } = new();
+
+        [JsonPropertyName("esrb_rating")]
+        public EsrbRating? EsrbRating { get; set; }
+    }
+
+    public class EsrbRating
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
     }
 
     public class PlatformInfo
@@ -122,17 +265,5 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
     {
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
-    }
-
-    // DTO de saída
-    public class GameDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Released { get; set; } = string.Empty;
-        public string BackgroundImage { get; set; } = string.Empty;
-        public double Rating { get; set; }
-        public List<string> Platforms { get; set; } = new();
-        public List<string> Genres { get; set; } = new();
     }
 }
