@@ -1,68 +1,48 @@
-# Crie ou atualize o .gitignore na raiz
-cat > .gitignore << 'EOF'
-## Visual Studio e VS Code
+cd E:\Projetos_Dot\CatalogoHub
+# Cria o arquivo .gitignore com o conteúdo correto
+@'
+# Visual Studio
 .vs/
 .vscode/
-*.suo
 *.user
+*.suo
 *.userosscache
 *.sln.docstates
+*.dbmdl
+*.db-journal
 
-## Build results
-[Bb]in/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-*.exe
-*.dll
-*.pdb
-*.cache
-
-## .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
-
-## NuGet
-*.nupkg
-packages/
-.nuget/
-
-## Rider
-.idea/
-*.sln.iml
-
-## User-specific files
-*.rsuser
-*.userprefs
-
-## Arquivos sensíveis - NUNCA commitar!
+# .NET
+bin/
+obj/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+appsettings.*.json
 appsettings.Development.json
-appsettings.Production.json
-appsettings.Staging.json
-appsettings.Local.json
-appsettings.Private.json
-secrets.json
-*.secret
+appsettings.local.json
 
-## Logs e temp
+# Node.js/Next.js
+node_modules/
+.next/
+out/
+dist/
 *.log
+.env*.local
+.env
+
+# IDE
+.idea/
 *.swp
 *.swo
-*~
 
-## OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+# Sistema
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-## Fontes do QuestPDF
-LatoFont/
-EOF
-
-# Adicione ao Git
-git add .gitignore
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+'@ | Out-File -FilePath .gitignore -Encoding UTF8

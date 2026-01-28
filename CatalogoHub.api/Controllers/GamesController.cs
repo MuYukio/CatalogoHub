@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CatalogoHub.api.Infrastructure.ExternalApis;
-
+using Microsoft.Extensions.Logging;
+using CatalogoHub.api.Domain.DTOs;
 
 namespace CatalogoHub.api.Controllers
 {
@@ -10,10 +11,11 @@ namespace CatalogoHub.api.Controllers
     public class GamesController : ControllerBase
     {
         private readonly RawgService _rawgService;
-
-        public GamesController(RawgService rawgService)
+        private readonly ILogger<RawgService> _logger;
+        public GamesController(RawgService rawgService, ILogger<RawgService> logger)
         {
             _rawgService = rawgService;
+            _logger = logger;
         }
 
         [HttpGet("search")]
@@ -89,6 +91,49 @@ namespace CatalogoHub.api.Controllers
                     success = false,
                     error = ex.Message
                 });
+            }
+        }
+        [HttpGet("recent")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetRecentGames(
+            [FromQuery] int limit = 5 ,
+            [FromQuery] bool includeAdult = false)
+        {
+            try
+            {
+                var recentGames = await _rawgService.GetRecentlyReleasedGamesAsync(limit);
+                if (!includeAdult)
+                {
+                    recentGames = recentGames.Where(g => !g.IsAdultContent).ToList();
+                }
+                return Ok(recentGames);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recent games");
+                return StatusCode(500, new { message = "Error getting recent games", error = ex.Message });
+            }
+        }
+        [HttpGet("popular")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetPopularGames(
+                   [FromQuery] int page = 1,
+                   [FromQuery] int pageSize = 20,
+                   [FromQuery] bool includeAdult = false)
+        {
+            try
+            {
+                var popularGames = await _rawgService.GetPopularGamesAsync(page, pageSize);
+                if (!includeAdult)
+                {
+                    popularGames = popularGames.Where(g => !g.IsAdultContent).ToList();
+                }
+                return Ok(popularGames);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting popular games");
+                return StatusCode(500, new { message = "Error getting popular games", error = ex.Message });
             }
         }
     }

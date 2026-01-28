@@ -77,24 +77,25 @@ namespace CatalogoHub.api.Controllers
         }
         [HttpGet("test/popular")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetPopularAnimes()
+        public async Task<IActionResult> GetPopularAnimesTest()
         {
             try
             {
-                var anime = await _jikanService.GetAnimeDetailsAsync(20);
+                var animes = await _jikanService.GetPopularAnimesAsync(1, 5);
 
-                if (anime == null)
+                if (animes == null || animes.Count == 0)
                     return Ok(new
                     {
                         success = false,
-                        message = "Test failed - Naruto not found"
+                        message = "Test failed - No popular animes found"
                     });
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Jikan API is working correctly!",
-                    testAnime = anime
+                    message = "Jikan Popular API is working correctly!",
+                    count = animes.Count,
+                    sampleAnime = animes.FirstOrDefault()
                 });
             }
             catch (Exception ex)
@@ -102,9 +103,53 @@ namespace CatalogoHub.api.Controllers
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Jikan API test failed",
+                    message = "Jikan Popular API test failed",
                     error = ex.Message
                 });
+            }
+        }
+
+        [HttpGet("recommendations")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<AnimeRecommendationDto>>> GetAnimeRecommendations([FromQuery] int limit = 5)
+        {
+            try
+            {
+                _logger.LogInformation("🎌 Getting anime recommendations, limit: {Limit}", limit);
+
+                var recommendations = await _jikanService.GetAnimeRecommendationsAsync(limit);
+
+                _logger.LogInformation("✅ Returning {Count} recommendations", recommendations.Count);
+
+                return Ok(recommendations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting anime recommendations");
+                return StatusCode(500, new { message = "Error getting recommendations", error = ex.Message });
+            }
+        }
+
+        [HttpGet("popular")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<AnimeDto>>> GetPopularAnimes(
+           [FromQuery] int page = 1,
+           [FromQuery] int limit = 20)
+        {
+            try
+            {
+                _logger.LogInformation("🎌 [CONTROLLER] Getting popular animes - Page: {Page}, Limit: {Limit}", page, limit);
+
+                var popularAnimes = await _jikanService.GetPopularAnimesAsync(page, limit);
+
+                _logger.LogInformation("✅ [CONTROLLER] Returning {Count} animes", popularAnimes.Count);
+
+                return Ok(popularAnimes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ [CONTROLLER] Error getting popular animes");
+                return StatusCode(500, new { message = "Error getting popular animes", error = ex.Message });
             }
         }
     }

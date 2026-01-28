@@ -34,3 +34,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+# Terminal 1: Backend (.NET)
+cd E:\Projetos_Dot\CatalogoHub\CatalogoHub.api
+dotnet run
+# Deve mostrar: Now listening on: http://localhost:5114
+
+# Terminal 2: Frontend (Next.js)
+cd E:\Projetos_Dot\CatalogoHub\frontend\catalogohub
+npm run dev
+# Acessar: http://localhost:3000

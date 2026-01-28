@@ -1,0 +1,48 @@
+cd EProjetos_DotCatalogoHub
+# Cria o arquivo .gitignore com o conteúdo correto
+@'
+# Visual Studio
+.vs
+.vscode
+.user
+.suo
+.userosscache
+.sln.docstates
+.dbmdl
+.db-journal
+
+# .NET
+bin
+obj
+[Tt]est[Rr]esult
+[Bb]uild[Ll]og.
+appsettings..json
+appsettings.Development.json
+appsettings.local.json
+
+# Node.jsNext.js
+node_modules
+.next
+out
+dist
+.log
+.env.local
+.env
+
+# IDE
+.idea
+.swp
+.swo
+
+# Sistema
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs
+.log
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+'@  Out-File -FilePath .gitignore -Encoding UTF8
