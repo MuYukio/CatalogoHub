@@ -1,5 +1,8 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.AspNetCore.Authorization;
+
+using System.Reflection; 
 
 namespace CatalogoHub.api.Infrastructure.Swagger
 {
@@ -7,31 +10,34 @@ namespace CatalogoHub.api.Infrastructure.Swagger
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any()
-                || context.MethodInfo.GetCustomAttributes(true)
-                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any();
+            var declaringType = context.MethodInfo.DeclaringType;
+            if (declaringType == null) return;
 
-            if (hasAuthorize)
+            var hasAuthorize =
+                declaringType.GetCustomAttributes(true)
+                    .OfType<AuthorizeAttribute>().Any()
+                || context.MethodInfo.GetCustomAttributes(true)
+                    .OfType<AuthorizeAttribute>().Any();
+
+            if (!hasAuthorize) return;
+
+            operation.Security = new List<OpenApiSecurityRequirement>
+    {
+        new OpenApiSecurityRequirement
+        {
             {
-                operation.Security = new List<OpenApiSecurityRequirement>
+                new OpenApiSecurityScheme
                 {
-                    new OpenApiSecurityRequirement
+                    Reference = new OpenApiReference
                     {
-                        {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            },
-                            new List<string>()
-                        }
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
                     }
-                };
+                },
+                new List<string>()
             }
+        }
+    };
         }
     }
 }

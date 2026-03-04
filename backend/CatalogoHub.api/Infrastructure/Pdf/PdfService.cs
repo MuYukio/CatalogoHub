@@ -14,8 +14,7 @@ namespace CatalogoHub.api.Infrastructure.Pdf
     {
         public byte[] GenerateFavoritesPdf(FavoritesPdfDto pdfData)
         {
-            // Configurar licença
-            QuestPDF.Settings.License = LicenseType.Community;
+     
 
             var document = Document.Create(container =>
             {

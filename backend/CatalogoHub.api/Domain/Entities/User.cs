@@ -1,22 +1,25 @@
-﻿using CatalogoHub.api.Domain.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace CatalogoHub.api.Domain.Entities //REPRESENTA UM USARIO NO BANCO
+namespace CatalogoHub.api.Domain.Entities 
 {
     public class User
     {
         public int Id { get; set; }
-        
-        [EmailAddress]
-        public  required string Email { get; set; }
 
-        [MinLength(6)]
+        [MaxLength(255)] 
+        public required string Email { get; set; }
+
+        [MaxLength(255)] 
         public required string PasswordHash { get; set; }
 
-        public DateTime CreatedAt { get; set; } =  DateTime.UtcNow;
+        [MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
 
-        //relacionamento
-        public List<UserFavorite>favorites { get; set; } = new();
+        public int Age { get; set; } = 18;
+        public bool AllowAdultContent { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? LastLoginAt { get; set; }
 
         public ICollection<UserFavorite> Favorites { get; set; } = new List<UserFavorite>();
     }

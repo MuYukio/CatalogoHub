@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using System.Text;
-
+using CatalogoHub.api.Infrastructure.Pdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,14 +27,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<RawgService>();
+builder.Services.AddHttpClient<RawgService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.rawg.io/api/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddScoped<JikanService>();
 QuestPDF.Settings.License = LicenseType.Community;
+builder.Services.AddScoped<PdfService>();
 
 builder.Services.AddSwaggerGen(c =>
 {
    
-    // Configuração de segurança SIMPLIFICADA e compatível
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -47,13 +51,13 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition("Bearer", securityScheme);
 
-    // Forma ALTERNATIVA que funciona com qualquer versão
 
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<JwtService>();
+
 
 // 2. CORS para o Next.js
 builder.Services.AddCors(options =>
@@ -103,6 +107,8 @@ builder.Services.AddHttpClient<JikanService>(client =>
 
 
 var app = builder.Build();
+builder.Services.AddLogging();
+
 
 // 5. Pipeline de desenvolvimento
 if (app.Environment.IsDevelopment())

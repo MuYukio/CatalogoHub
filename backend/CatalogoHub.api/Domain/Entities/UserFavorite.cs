@@ -1,22 +1,25 @@
-﻿using CatalogoHub.api.Domain.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CatalogoHub.api.Domain.Entities
 {
-    public class UserFavorite // ← ENTIDADE (representa o banco)
+    public class UserFavorite
     {
         public int Id { get; set; }
-        public  int UserId { get; set; }
-        public required string ExternalId { get; set; }
-        public required string Type { get; set; }
-        public required string Title { get; set; }
-        public required string ImageUrl { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [MaxLength(10)]
+        public string Type { get; set; } = string.Empty; 
+        [MaxLength(50)]
+        public string ExternalId { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public User User { get; set; }
-       
-      
     }
 }

@@ -1,89 +1,138 @@
 ﻿using AutoMapper;
+using BC = BCrypt.Net.BCrypt; 
 using CatalogoHub.api.Domain.DTOs;
 using CatalogoHub.api.Domain.Entities;
 using CatalogoHub.api.Infrastructure.Auth;
 using CatalogoHub.api.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
+using System.Security.Claims;
 
-namespace CatalogoHub.api.Controllers // registro e login
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    private readonly AppDbContext _context;
+    private readonly JwtService _jwtService;
+    private readonly IMapper _mapper;
+    private readonly ILogger<AuthController> _logger;
+
+    public AuthController(AppDbContext context, JwtService jwtService,
+        IMapper mapper, ILogger<AuthController> logger)
     {
-        private readonly AppDbContext _context;
-        private readonly JwtService _jwtService;
-        private readonly IMapper _mapper;
+        _context = context;
+        _jwtService = jwtService;
+        _mapper = mapper;
+        _logger = logger;
+    }
 
-        public AuthController(AppDbContext context, JwtService jwtService, IMapper mapper)
+    [HttpPost("register"), AllowAnonymous]
+    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
+    {
+        try
         {
-            _context = context;
-            _jwtService = jwtService;
-            _mapper = mapper;
-        }
-
-        [HttpPost("register")]
-        public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto registerDto)
-        {
-            // Verificar se email já existe
             if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
-                return BadRequest("Email já está em uso");
+                return BadRequest(new { message = "Email já está em uso." });
 
-            // Criar usuário
+            if (registerDto.Password != registerDto.ConfirmPassword)
+                return BadRequest(new { message = "As senhas não coincidem." });
+
             var user = new User
             {
+                Name = registerDto.Name,
                 Email = registerDto.Email,
-                PasswordHash = HashPassword(registerDto.Password)
+                PasswordHash = BC.HashPassword(registerDto.Password),
+                Age = registerDto.Age,
+                AllowAdultContent = registerDto.AllowAdultContent,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Gerar token
+            _logger.LogInformation("Novo usuário registrado: {Email}", user.Email);
+
             var token = _jwtService.GenerateToken(user);
-
-            return new AuthResponseDto
+            return Ok(new AuthResponseDto
             {
+                UserId = user.Id,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(2),
-                User = _mapper.Map<UserDto>(user)
-            };
+                Name = user.Name,
+                Email = user.Email,
+                Age = user.Age,
+                AllowAdultContent = user.AllowAdultContent,
+                ExpiresAt = _jwtService.GetTokenExpiration()
+            });
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao registrar usuário");
+            return StatusCode(500, new { message = "Erro interno do servidor." });
+        }
+    }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
+    [HttpPost("login"), AllowAnonymous]
+    public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
+    {
+        try
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-            if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
-                return Unauthorized("Email ou senha incorretos");
+            if (user == null || !BC.Verify(loginDto.Password, user.PasswordHash))
+                return Unauthorized(new { message = "Email ou senha incorretos." });
+
+            user.LastLoginAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
 
             var token = _jwtService.GenerateToken(user);
-
-            return new AuthResponseDto
+            return Ok(new AuthResponseDto
             {
+                UserId = user.Id,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(2),
-                User = _mapper.Map<UserDto>(user)
-            };
+                Name = user.Name,
+                Email = user.Email,
+                Age = user.Age,
+                AllowAdultContent = user.AllowAdultContent,
+                ExpiresAt = _jwtService.GetTokenExpiration()
+            });
         }
-
-        private string HashPassword(string password)
+        catch (Exception ex)
         {
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
+            _logger.LogError(ex, "Erro ao fazer login");
+            return StatusCode(500, new { message = "Erro interno do servidor." });
         }
+    }
 
-        private bool VerifyPassword(string password, string storedHash)
+    [HttpGet("me"), Authorize]
+    public async Task<ActionResult<AuthResponseDto>> GetCurrentUser()
+    {
+        try
         {
-            var hash = HashPassword(password);
-            return hash == storedHash;
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null || !int.TryParse(claim.Value, out var userId))
+                return Unauthorized(new { message = "Usuário não autenticado." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return NotFound(new { message = "Usuário não encontrado." });
+
+            return Ok(new AuthResponseDto
+            {
+                UserId = user.Id,
+                Token = _jwtService.GenerateToken(user),
+                Name = user.Name,
+                Email = user.Email,
+                Age = user.Age,
+                AllowAdultContent = user.AllowAdultContent,
+                ExpiresAt = _jwtService.GetTokenExpiration()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao obter perfil");
+            return StatusCode(500, new { message = "Erro interno do servidor." });
         }
     }
 }
