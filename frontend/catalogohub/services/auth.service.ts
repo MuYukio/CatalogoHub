@@ -1,37 +1,41 @@
 import { api } from '@/lib/api'
-import { AuthResponse, LoginData, RegisterData } from '@/types'
-export type{}
+import { AuthResponse, LoginRequest, RegisterRequest } from '@/types'
 
+export const authService = {
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const payload = { ...data, confirmPassword: data.password }
+    const response = await api.post('/api/Auth/register', payload)
+    return response.data
+  },
 
-class AuthService {
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const response = await api.post('/api/Auth/login', data)
+    return response.data
+  },
 
-    async login( data: LoginData): Promise<AuthResponse>{
-        const response = await api.post<AuthResponse>('api/auth/login',data)
-        return response.data
+  getSession: async (): Promise<AuthResponse | null> => {
+    const token = localStorage.getItem('token')
+    if (!token) return null
+    try {
+      const response = await api.get('/api/Auth/me')
+      return response.data
+    } catch {
+      return null
     }
+  },
 
-    async register (data: RegisterData): Promise<AuthResponse>{
+  getToken: (): string | null => {
+    return localStorage.getItem('token')
+  },
 
-        const response = await api.post<AuthResponse>('api/auth/register',data)
-        return response.data
-    }
+  getUser: (): any | null => {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  },
 
-    async logout(): Promise<void>{
-        return Promise.resolve()
-    }
-
-    async validateToken(): Promise<boolean>{
-
-        try{
-            await api.get('api/favorites')
-            return true
-        }
-        catch{
-            return false
-        }
-
-    }
-
+  logout: (): void => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  },
 }
-
-export const authService = new AuthService()

@@ -3,11 +3,8 @@ import { Game } from '@/types'
 
 export interface GameSearchResponse {
   results: Game[]
-  pagination: {
-    currentPage: number
-    hasNextPage: boolean
-    totalItems?: number
-  }
+  hasNextPage: boolean
+  totalCount?:number
 }
 
 export interface GamesSearchParams {
@@ -24,31 +21,31 @@ class GameService {
         timeout: 15000
       })
 
-      // A API retorna um array diretamente
-      const gamesArray = response.data
-
-      if (!Array.isArray(gamesArray)) {
+      const data = response.data
+      
+       if (Array.isArray(data)) {
         return {
-          results: [],
-          pagination: { currentPage: page, hasNextPage: false }
+          results: data,
+          hasNextPage: data.length === limit,
+          totalCount: data.length
         }
       }
-
       return {
-        results: gamesArray,
-        pagination: {
-          currentPage: page,
-          hasNextPage: gamesArray.length === limit
-        }
+        results: data.results || data.Results || [],
+        hasNextPage: data.hasNextPage || data.hasnextpage || false,
+        totalCount: data.totalCount || data.totalcount || (data.results ? data.results.length : 0)
       }
+      
     } catch (error) {
-      // Em produção, enviar para serviço de monitoramento (Sentry, etc.)
+
+      console.error('Error searching games:', error)
       return {
         results: [],
-        pagination: { currentPage: page, hasNextPage: false }
-      }
+        hasNextPage: false,
+        totalCount: 0
     }
   }
+}
 
   async getById(id: number): Promise<Game> {
     const response = await api.get(`/api/games/${id}`)

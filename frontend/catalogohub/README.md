@@ -36,7 +36,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 # Terminal 1: Backend (.NET)
-cd E:\Projetos_Dot\CatalogoHub\CatalogoHub.api
+cd E:\Projetos_Dot\CatalogoHub\backend\CatalogoHub.api
 dotnet run
 # Deve mostrar: Now listening on: http://localhost:5114
 

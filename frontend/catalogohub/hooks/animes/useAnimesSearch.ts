@@ -1,4 +1,4 @@
-// hooks/animes/useAnimesSearch.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { animesService } from '@/services/animes.service';
 
@@ -14,5 +14,6 @@ export function useAnimesSearch(
     enabled: enabled && !!query.trim(),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 }

@@ -1,4 +1,4 @@
-// hooks/games/useRecentGames.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { gamesService } from '@/services/games.service';
 

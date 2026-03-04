@@ -1,8 +1,8 @@
-// hooks/animes/useAnimes.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { animesService } from '@/services/animes.service';
 
-// Hook para recomendações
+
 export function useAnimeRecommendations(limit: number = 5) {
   return useQuery({
     queryKey: ['animes', 'recommendations', limit],
@@ -11,7 +11,6 @@ export function useAnimeRecommendations(limit: number = 5) {
   });
 }
 
-// Hook para detalhes do anime
 export function useAnime(malId: number) {
   return useQuery({
     queryKey: ['animes', 'detail', malId],

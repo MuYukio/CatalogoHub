@@ -1,19 +1,27 @@
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { User } from '@/types'
 
-interface User{
-    id:number
-    email: string
-    createdAt: string
+interface AuthState {
+  user: User | null
+  token: string | null
+  isAuthenticated: boolean
+  login: (token: string, user: User) => void
+  logout: () => void
+  setToken: (token: string) => void
+  setUser: (user: User) => void
 }
 
-interface AuthState{
-    user: User | null
-    isAuthenticated: boolean
-    login: (token: string, user:User) => void
-    logout: () => void 
-    setToken: (token:string) => void
-    token: string | null 
+const setCookie = (name: string, value: string, days: number = 2) => {
+  if (typeof window === 'undefined') return
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`
+}
+
+const removeCookie = (name: string) => {
+  if (typeof window === 'undefined') return
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,21 +31,23 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       login: (token: string, user: User) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', token)
-        }
         set({ token, user, isAuthenticated: true })
+        setCookie('token', token)
       },
       logout: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token')
-        }
         set({ token: null, user: null, isAuthenticated: false })
+        removeCookie('token')
       },
-      setToken: (token: string) => set({ token }),
+      setToken: (token: string) => {
+        set({ token })
+        setCookie('token', token)
+      },
+      setUser: (user: User) => {
+        set({ user })
+      },
     }),
     {
-      name: 'auth-storage',
+      name: 'auth-storage', 
     }
   )
 )

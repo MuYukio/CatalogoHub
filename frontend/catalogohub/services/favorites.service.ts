@@ -16,7 +16,7 @@ export interface FavoriteByTypeParams{
 class FavoritesService {
 
     async getAll(): Promise<Favorite[]>{
-        const response = await api.get<Favorite[]>('api/favorites')
+        const response = await api.get<Favorite[]>('/api/favorites')
         return response.data
     }
 

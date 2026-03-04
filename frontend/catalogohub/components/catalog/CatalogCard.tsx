@@ -1,4 +1,4 @@
-// components/catalog/CatalogCard.tsx
+
 import { useState } from 'react';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Calendar, Users, AlertCircle } from 'lucide-react';
 import type { Game, Anime } from '@/types';
 
-// MUDE para plural: 'games' | 'animes'
 interface CatalogCardProps {
   item: Game | Anime;
   type: 'games' | 'animes';
@@ -16,24 +15,21 @@ interface CatalogCardProps {
 export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps) {
   const [imgError, setImgError] = useState(false);
   
-  // AJUSTE para plural
+
   const isGame = type === 'games';
   const isAnime = type === 'animes';
   
-  // Dados comuns
   const title = isGame ? (item as Game).name : (item as Anime).title;
   const image = isGame ? (item as Game).backgroundImage : (item as Anime).imageUrl;
   const rating = isGame ? (item as Game).rating : (item as Anime).score;
   const isAdult = item.isAdultContent || false;
   
-  // Dados específicos
   const released = isGame ? (item as Game).released : null;
   const platforms = isGame ? (item as Game).platforms : [];
   const genres = item.genres || [];
   const episodes = isAnime ? (item as Anime).episodes : null;
   const status = isAnime ? (item as Anime).status : null;
   
-  // Para modo lista
   if (viewMode === 'list') {
     return (
       <Card className="flex gap-4 p-4 hover:shadow-md transition-shadow">
@@ -76,7 +72,7 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
                 </Badge>
               )}
               <Badge variant={isGame ? "default" : "secondary"} className="text-xs">
-                {isGame ? '🎮 Jogo' : '🎌 Anime'}
+                {isGame ? ' Jogo' : ' Anime'}
               </Badge>
             </div>
           </div>
@@ -98,10 +94,9 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
     );
   }
 
-  // Modo grid (padrão)
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow group">
-      <div className="relative aspect-video overflow-hidden">
+      <div className={`relative overflow-hidden ${type === 'animes' ? 'aspect-[2/3]' : 'aspect-video'}`}>
         <Image
           src={imgError ? "/images/placeholder.jpg" : (image || "/images/placeholder.jpg")}
           alt={title || `${isGame ? 'Jogo' : 'Anime'} sem título`}
@@ -113,14 +108,11 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
           quality={85}
         />
         
-        {/* Badge de tipo */}
         <div className="absolute top-2 left-2 z-10">
           <Badge variant={isGame ? "default" : "secondary"}>
-            {isGame ? '🎮 Jogo' : '🎌 Anime'}
+            {isGame ? ' Jogo' : ' Anime'}
           </Badge>
         </div>
-        
-        {/* Badge de conteúdo adulto */}
         {isAdult && (
           <div className="absolute top-2 right-2 z-10">
             <Badge variant="destructive" className="font-bold">
@@ -128,11 +120,9 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
             </Badge>
           </div>
         )}
-        
-        {/* Overlay gradiente */}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
-        {/* Rating/Score */}
         {(rating || rating === 0) && (
           <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
             <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
@@ -148,7 +138,6 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
           {title || 'Sem título'}
         </h3>
         
-        {/* Informações específicas */}
         <div className="flex flex-wrap items-center gap-2 mb-3 text-sm text-muted-foreground">
           {released && (
             <div className="flex items-center gap-1 shrink-0">
@@ -171,7 +160,6 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
           )}
         </div>
         
-        {/* Gêneros */}
         {genres.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {genres.slice(0, 3).map((genre, index) => (
@@ -190,16 +178,13 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
             )}
           </div>
         )}
-        
-        {/* Content warnings */}
         {item.contentWarnings && item.contentWarnings.length > 0 && (
           <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 mb-2">
             <AlertCircle className="h-3 w-3" />
             <span>Contém: {item.contentWarnings.join(', ')}</span>
           </div>
         )}
-        
-        {/* Platforms (apenas para jogos) */}
+
         {platforms && platforms.length > 0 && (
           <div className="text-xs text-muted-foreground">
             {platforms.slice(0, 2).join(', ')}

@@ -1,4 +1,4 @@
-// hooks/animes/usePopularAnimes.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { animesService } from '@/services/animes.service';
 
