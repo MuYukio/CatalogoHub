@@ -1,118 +1,203 @@
-# CatalogoHub
+#  CatalogoHub
 
-Sistema completo para gerenciamento de favoritos de jogos e animes, desenvolvido com uma API RESTful moderna e funcionalidades de geração de relatórios em PDF.
+> Catálogo pessoal de jogos e animes com autenticação, favoritos e exportação em PDF.
 
-## Visao Geral
-
-O CatalogoHub e uma solucao backend robusta que permite aos usuarios catalogar seus interesses em entretenimento. O sistema integra-se a APIs publicas (RAWG e Jikan) para fornecer dados em tempo real, garante seguranca atraves de autenticacao JWT e oferece recursos avancados como exportacao de catalogos para PDF.
-
----
-
-## Funcionalidades Implementadas
-
-### Autenticacao e Autorizacao
-- Registro e login de usuarios com JWT (JSON Web Tokens).
-- Tokens seguros com validade configuravel e protecao de rotas por autorizacao.
-- Isolamento de dados garantindo que cada usuario acesse apenas seus proprios registros.
-
-### Gerenciamento de Favoritos
-- CRUD completo de favoritos para jogos e animes.
-- Cada usuario gerencia sua propria lista de forma independente.
-- Validacao de dados rigorosa com Data Annotations.
-
-### Integracao com APIs Externas
-- RAWG API: Catalogo completo para busca de jogos.
-- Jikan API: Catalogo completo para busca de animes.
-- Busca em tempo real com paginacao e tratamento de erros.
-
-### Geracao de Relatorios em PDF
-- PDF profissional gerado com a biblioteca QuestPDF.
-- Layout responsivo com resumo estatistico da colecao.
-- Download automatico via endpoint dedicado.
+![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat-square&logo=postgresql)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
 ---
 
-## Arquitetura Tecnica
+##  Visão Geral
 
-### Backend Stack
-- Framework: ASP.NET Core 10
-- Banco de Dados: PostgreSQL
-- ORM: Entity Framework Core 10 (com Migrations)
-- Autenticacao: JWT (JSON Web Tokens)
-- Relatorios: QuestPDF
-- Mapeamento: AutoMapper
-- Documentacao: Swagger / OpenAPI
-
-### Padroes de Design
-- Arquitetura em Camadas (Controllers, Domain, Application, Infrastructure).
-- Repository Pattern para abstracao do banco de dados.
-- DTOs (Data Transfer Objects) para trafego de dados.
-- Injecao de Dependencia nativa.
-- Tratamento centralizado de excecoes.
+O **CatalogoHub** é uma aplicação fullstack que permite aos usuários descobrir, catalogar e organizar seus jogos e animes favoritos. O sistema integra as APIs públicas [RAWG](https://rawg.io/apidocs) e [Jikan](https://docs.api.jikan.moe/) para dados em tempo real, protege os dados com autenticação JWT e oferece exportação do catálogo para PDF.
 
 ---
 
-## Configuracao do Ambiente
+##  Funcionalidades
 
-### Pre-requisitos
-- .NET 10 SDK
-- PostgreSQL 15+
-- RAWG API Key (gratuita)
+###  Autenticação e Autorização
+- Registro e login com **JWT (JSON Web Tokens)**
+- Tokens com validade configurável
+- Proteção de rotas — cada usuário acessa apenas seus próprios dados
 
-### Instalacao e Execucao
+###  Gerenciamento de Favoritos
+- CRUD completo de favoritos para jogos e animes
+- Listas independentes por usuário
+- Validação de dados com Data Annotations
 
-1. Clonar o Repositorio
-   ```
-    git clone https://github.com/MuYukio/CatalogoHub.git
-    cd CatalogoHub
+###  Integração com APIs Externas
+- **RAWG API** — busca de jogos com paginação e filtragem por conteúdo adulto
+- **Jikan API** — busca de animes e temporada atual em exibição
+- Tratamento de erros e fallback em todas as integrações
 
-3. Configurar o Banco de Dados
-    Voce pode utilizar um banco local ou via Docker:
+###  Exportação em PDF
+- Relatório profissional gerado com **QuestPDF**
+- Layout com resumo estatístico da coleção
+- Download via endpoint dedicado
 
-    Opcao via Docker:
-   ```
-    docker run --name catalogohub-db -e POSTGRES_PASSWORD=senha -p 5432:5432 -d postgres:15
-   ```
-   Opcao Local:
-  ```
-    createdb CatalogoHubDb
-  ```
-5. Variaveis de Ambiente
-    Edite o arquivo backend/CatalogoHub.api/appsettings.Development.json com suas credenciais:
+###  Frontend
+- Interface moderna com **Next.js 15** e **Tailwind CSS**
+- Carrossel interativo com suporte a imagens portrait (animes) e landscape (jogos)
+- Modo escuro/claro
+- Busca com debounce e paginação infinita
+
+---
+
+##  Arquitetura
 ```
-    {
-      "ConnectionStrings": {
-        "DefaultConnection": "Host=localhost;Port=5432;Database=CatalogoHubDb;Username=postgres;Password=sua_senha"
-      },
-      "Jwt": {
-        "Key": "sua_chave_secreta_minimo_32_caracteres_aqui",
-        "Issuer": "CatalogoHubApi",
-        "Audience": "CatalogoHubFrontend"
-      },
-      "ExternalApis": {
-        "Rawg": {
-          "ApiKey": "sua_chave_rawg_aqui"
-        }
-      }
+CatalogoHub/
+├── backend/
+│   └── CatalogoHub.api/
+│       ├── Controllers/          # Endpoints da API
+│       ├── Domain/
+│       │   ├── DTOs/             # Objetos de transferência de dados
+│       │   └── Entities/         # Modelos do banco de dados
+│       └── Infrastructure/
+│           ├── Auth/             # JWT Service
+│           ├── Data/             # AppDbContext + Migrations
+│           ├── ExternalApis/     # RawgService + JikanService
+│           ├── Mappings/         # AutoMapper profiles
+│           ├── Pdf/              # QuestPDF service
+│           └── Swagger/          # Configuração do Swagger
+└── frontend/
+    ├── app/                      # Páginas Next.js (App Router)
+    ├── components/               # Componentes reutilizáveis
+    ├── hooks/                    # Custom hooks (React Query)
+    ├── services/                 # Camada de chamadas à API
+    └── types/                    # Tipagens TypeScript
+```
+
+###  Stack Backend
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| ASP.NET Core | 10 | Framework principal |
+| PostgreSQL | 15+ | Banco de dados |
+| Entity Framework Core | 10 | ORM + Migrations |
+| JWT Bearer | — | Autenticação |
+| QuestPDF | — | Geração de PDF |
+| AutoMapper | — | Mapeamento de objetos |
+| BCrypt.Net | — | Hash de senhas |
+| Swagger / OpenAPI | — | Documentação |
+
+###  Stack Frontend
+| Tecnologia | Uso |
+|---|---|
+| Next.js 15 | Framework React |
+| Tailwind CSS | Estilização |
+| TanStack Query | Cache e chamadas à API |
+| shadcn/ui | Componentes UI |
+
+---
+
+##  Configuração do Ambiente
+
+### Pré-requisitos
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 20+](https://nodejs.org/)
+- [PostgreSQL 15+](https://www.postgresql.org/)
+- [RAWG API Key](https://rawg.io/apidocs) (gratuita)
+
+---
+
+###  Instalação
+
+#### 1. Clonar o repositório
+```bash
+git clone https://github.com/MuYukio/CatalogoHub.git
+cd CatalogoHub
+```
+
+#### 2. Configurar o banco de dados
+
+**Via Docker (recomendado):**
+```bash
+docker run --name catalogohub-db \
+  -e POSTGRES_PASSWORD=sua_senha \
+  -p 5432:5432 \
+  -d postgres:15
+```
+
+**Local:**
+```bash
+createdb CatalogoHubDb
+```
+
+#### 3. Configurar variáveis de ambiente
+
+Edite `backend/CatalogoHub.api/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=CatalogoHubDb;Username=postgres;Password=sua_senha"
+  },
+  "Jwt": {
+    "Key": "sua_chave_secreta_minimo_32_caracteres_aqui",
+    "Issuer": "CatalogoHubApi",
+    "Audience": "CatalogoHubFrontend",
+    "ExpireHours": "24"
+  },
+  "ExternalApis": {
+    "Rawg": {
+      "ApiKey": "sua_chave_rawg_aqui",
+      "BaseUrl": "https://api.rawg.io/api"
     }
+  }
+}
 ```
-6. Migrations e Execucao
+
+>  **Nunca suba o `appsettings.json` com credenciais reais para o repositório.** Use `appsettings.Development.json` localmente e variáveis de ambiente em produção.
+
+#### 4. Rodar o backend
+```bash
+cd backend/CatalogoHub.api
+dotnet ef database update
+dotnet run
 ```
-    cd backend/CatalogoHub.api
-    dotnet ef database update
-    dotnet run
+
+#### 5. Rodar o frontend
+```bash
+cd frontend/catalogohub
+npm install
+npm run dev
 ```
+
 ---
 
-## Documentacao da API
+##  Endpoints da API
 
-Apos iniciar a aplicacao, os enderecos de acesso sao:
-```
-- Swagger UI: http://localhost:5114/swagger
-- API Base: http://localhost:5114/api
-```
+Após iniciar a aplicação:
+
+| | URL |
+|---|---|
+| Swagger UI | `http://localhost:5114/swagger` |
+| API Base | `http://localhost:5114/api` |
+
+### Principais rotas
+| Método | Rota | Descrição |
+|---|---|---|
+| `POST` | `/api/auth/register` | Registro de usuário |
+| `POST` | `/api/auth/login` | Login |
+| `GET` | `/api/auth/me` | Perfil do usuário autenticado |
+| `GET` | `/api/games/recent` | Jogos lançados recentemente |
+| `GET` | `/api/games/popular` | Jogos mais bem avaliados |
+| `GET` | `/api/games/search?query=` | Busca de jogos |
+| `GET` | `/api/animes/season/current` | Animes da temporada atual |
+| `GET` | `/api/animes/popular` | Animes mais populares |
+| `GET` | `/api/animes/search?query=` | Busca de animes |
+| `GET` | `/api/favorites` | Lista de favoritos do usuário |
+| `POST` | `/api/favorites` | Adicionar favorito |
+| `DELETE` | `/api/favorites/{id}` | Remover favorito |
+
 ---
 
-## Licenca
+##  Licença
 
-Este projeto esta licenciado sob a licenca MIT.
+Este projeto está licenciado sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+<p align="center">
+  Desenvolvido  por <a href="https://github.com/MuYukio">MuYukio</a>
+</p>
