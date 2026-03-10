@@ -1,5 +1,6 @@
-
 import axios from 'axios'
+
+// Interceptor axios: injeta o token em toda requisição automaticamente
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5114',
@@ -11,7 +12,9 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token')
+      const raw = localStorage.getItem('auth-storage')
+      const token = raw ? JSON.parse(raw)?.state?.token : null
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
@@ -26,8 +29,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        localStorage.removeItem('auth-storage')
         window.location.href = '/login'
       }
     }

@@ -1,6 +1,8 @@
 import { api } from '@/lib/api'
 import { AuthResponse, LoginRequest, RegisterRequest } from '@/types'
 
+// Comunicação com a API: register, login, getSession
+
 export const authService = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const payload = { ...data, confirmPassword: data.password }

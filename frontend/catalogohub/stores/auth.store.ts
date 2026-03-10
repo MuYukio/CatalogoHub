@@ -1,7 +1,8 @@
-
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { User } from '@/types'
+
+// estado global: guarda user/token em memória + localStorage + cookie
 
 interface AuthState {
   user: User | null
@@ -30,24 +31,28 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+
       login: (token: string, user: User) => {
         set({ token, user, isAuthenticated: true })
         setCookie('token', token)
       },
-      logout: () => {
+
+      logout: () => {                                    
         set({ token: null, user: null, isAuthenticated: false })
         removeCookie('token')
       },
+
       setToken: (token: string) => {
         set({ token })
         setCookie('token', token)
       },
+
       setUser: (user: User) => {
         set({ user })
       },
     }),
     {
-      name: 'auth-storage', 
+      name: 'auth-storage',
     }
   )
 )

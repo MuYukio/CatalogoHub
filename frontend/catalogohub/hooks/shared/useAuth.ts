@@ -4,6 +4,8 @@ import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/stores/auth.store'
 import { LoginRequest, RegisterRequest } from '@/types'
 
+// Combina service + store em hooks prontos para usar nos componentes
+
 export function useLogin() {
   const queryClient = useQueryClient()
   const { login } = useAuthStore()

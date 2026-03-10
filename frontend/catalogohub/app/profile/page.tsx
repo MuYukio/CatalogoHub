@@ -1,5 +1,5 @@
 
-import ProfileClient from '@/components/profile/ProfileClient'
+import ProfileClient from '@/components/profile/page'
 
 export default function ProfilePage() {
 

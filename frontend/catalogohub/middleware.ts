@@ -1,4 +1,4 @@
-// middleware.ts
+//  Proteção de rotas no servidor: verifica o cookie antes de renderizar
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
