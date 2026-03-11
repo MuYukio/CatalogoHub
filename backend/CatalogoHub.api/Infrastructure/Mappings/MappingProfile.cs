@@ -70,6 +70,7 @@ public class MappingProfile : Profile
         CreateMap<RawgGame, GameDto>()
             .ForMember(dest => dest.Platforms, opt => opt.MapFrom<GamePlatformsResolver>())
             .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                src.Genres.Select(g => g.Name).ToList()));
+                src.Genres.Select(g => g.Name).ToList()))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.DescriptionRaw));
     }
 }

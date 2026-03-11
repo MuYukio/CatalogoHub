@@ -217,6 +217,9 @@ namespace CatalogoHub.api.Infrastructure.ExternalApis
 
         [JsonPropertyName("esrb_rating")]
         public EsrbRating? EsrbRating { get; set; }
+
+        [JsonPropertyName("description_raw")]
+        public string? DescriptionRaw { get; set; }
     }
 
     public class EsrbRating

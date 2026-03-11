@@ -12,6 +12,6 @@
         public string? EsrbRating { get; set; } // "Mature", "Adult Only", etc.
         public bool IsAdultContent { get; set; }
         public List<string> ContentWarnings { get; set; } = new();
-        
+        public string? Description { get; set; }
     }
 }
