@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// Interceptor axios: injeta o token em toda requisição automaticamente
+
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5114',

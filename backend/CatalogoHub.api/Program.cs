@@ -12,16 +12,10 @@ using CatalogoHub.api.Infrastructure.Pdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuração para API
-
-// Adicione isso no início do builder
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
-
-// E registre o serviço com logger
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -38,7 +32,6 @@ builder.Services.AddScoped<PdfService>();
 
 builder.Services.AddSwaggerGen(c =>
 {
-   
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -48,36 +41,33 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Insira o token JWT: Bearer {token}"
     };
-
     c.AddSecurityDefinition("Bearer", securityScheme);
-
-
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<JwtService>();
 
+var frontendUrl = builder.Configuration["FRONTEND_URL"] ?? "http://localhost:3000";
 
-// 2. CORS para o Next.js
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextJs",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowNextJs", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",  
+                frontendUrl               
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-// 3. Configuração do banco
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// 4. Autenticação JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -105,12 +95,16 @@ builder.Services.AddHttpClient<JikanService>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-
 var app = builder.Build();
 builder.Services.AddLogging();
 
 
-// 5. Pipeline de desenvolvimento
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

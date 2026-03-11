@@ -1,4 +1,4 @@
-﻿// Infrastructure/Data/AppDbContext.cs
+﻿
 using CatalogoHub.api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
