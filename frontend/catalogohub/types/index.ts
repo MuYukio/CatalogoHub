@@ -21,6 +21,7 @@ export interface Game {
   isAdultContent: boolean;
   contentWarnings: string[];
   esrbRating?: string;
+  description?: string;
 }
 
 export interface Anime {

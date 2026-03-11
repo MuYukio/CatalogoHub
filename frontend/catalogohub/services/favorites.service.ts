@@ -31,7 +31,7 @@ class FavoritesService {
     }
 
     async delete(id: number ): Promise<void>{
-        await api.delete(`/api/favorite/${id}`)
+        await api.delete(`/api/favorites/${id}`)
     }
 
     async generatePdf(): Promise<Blob>{

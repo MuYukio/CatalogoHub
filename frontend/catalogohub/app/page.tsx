@@ -11,6 +11,7 @@ import { Search, TrendingUp, Sparkles, Gamepad2, Tv, Loader2, Flame, Clock } fro
 import { useDebounce } from "@/hooks/shared/useDebounce";
 import { useRecentGames, useGamesSearch } from "@/hooks/games";
 import { useCurrentSeasonAnimes, useAnimesSearch } from "@/hooks/animes";
+import { useAuthStore } from "@/stores/auth.store";
 import type { Game, Anime } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -19,11 +20,16 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [includeAdult, setIncludeAdult] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [accumulatedResults, setAccumulatedResults] = useState<(Game | Anime)[]>([]);
   const [hasMorePages, setHasMorePages] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
+  const { user, isAuthenticated } = useAuthStore();
+  const includeAdult = hydrated && isAuthenticated && (user?.allowAdultContent ?? false);
 
   const { data: recentGamesData, isLoading: isLoadingRecentGames } = useRecentGames(20, includeAdult);
   const { data: popularAnimesData, isLoading: isLoadingPopularAnimes } = useCurrentSeasonAnimes(20);
@@ -204,17 +210,6 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-
-              {/* Filtro adulto */}
-              <label className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-2 rounded-full border cursor-pointer hover:bg-muted/50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={includeAdult}
-                  onChange={(e) => setIncludeAdult(e.target.checked)}
-                  className="h-4 w-4 accent-red-500"
-                />
-                <span className="text-sm">Conteúdo adulto</span>
-              </label>
             </div>
 
             {carouselLoading ? (
@@ -234,13 +229,7 @@ export default function HomePage() {
                   <div className="text-6xl mb-4 opacity-20">{isGames ? "🎮" : "📺"}</div>
                   <p className="text-muted-foreground">
                     Nenhum {isGames ? "jogo" : "anime"} encontrado
-                    {!includeAdult && " (conteúdo adulto oculto)"}
                   </p>
-                  {!includeAdult && (
-                    <Button className="mt-4" size="sm" onClick={() => setIncludeAdult(true)}>
-                      Mostrar conteúdo adulto
-                    </Button>
-                  )}
                 </div>
               </div>
             )}
@@ -356,7 +345,7 @@ export default function HomePage() {
                   {isLoadingMore ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Carregando...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4" /> Carregar Mais</>
+                    <> Carregar Mais</>
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -404,7 +393,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );

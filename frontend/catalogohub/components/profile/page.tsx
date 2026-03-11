@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useAuthStore } from '@/stores/auth.store' // ← corrigido: plural + ponto
+import { useAuthStore } from '@/stores/auth.store'
 import { favoritesService } from '@/services/favorites.service'
 import { authService } from '@/services/auth.service'
 import type { Favorite } from '@/types'
@@ -84,7 +84,7 @@ export default function ProfilePage() {
 
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* ── Card de perfil ── */}
+        {/*  Card de perfil  */}
         <div className="relative rounded-2xl border border-border/50 bg-card overflow-hidden mb-8 shadow-sm">
           {/* Banner gradiente */}
           <div className="h-28 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 opacity-90" />
@@ -130,7 +130,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Estatísticas ── */}
+        {/*  Estatísticas  */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Total', value: favorites.length, icon: <Heart size={18} />, color: 'text-pink-500', bg: 'bg-pink-50 dark:bg-pink-950/40' },
@@ -147,7 +147,7 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* ── Favoritos ── */}
+        {/*  Favoritos  */}
         <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
           {/* Header da seção */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border/40">
@@ -253,7 +253,7 @@ export default function ProfilePage() {
                           ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
                           : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
                       )}>
-                        {fav.type === 'Game' ? '🎮 Jogo' : '📺 Anime'}
+                        {fav.type === 'Game' ? 'Jogo' : 'Anime'}
                       </span>
                     </div>
 
