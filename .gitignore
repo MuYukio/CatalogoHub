@@ -38,6 +38,7 @@ dist
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+backend/CatalogoHub.api/appsettings.json
 
 # Logs
 logs
