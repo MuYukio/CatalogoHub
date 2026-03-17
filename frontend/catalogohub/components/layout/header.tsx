@@ -171,7 +171,7 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
           {/* Desktop: ThemeToggle + botões de auth */}
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <div className="h-6 w-px bg-border mx-1" />
+              <div className="h-6 w-px bg-border mx-1" />
             <AuthButtons />
           </div>
 

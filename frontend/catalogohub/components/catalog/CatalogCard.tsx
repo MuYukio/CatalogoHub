@@ -110,9 +110,7 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
                 </div>
               )}
               {isAdult && <Badge variant="destructive" className="text-xs">18+</Badge>}
-              <Badge variant={isGame ? 'default' : 'secondary'} className="text-xs">
-                {isGame ? 'Jogo' : 'Anime'}
-              </Badge>
+              
             </div>
           </div>
         </Card>
@@ -151,9 +149,6 @@ export function CatalogCard({ item, type, viewMode = 'grid' }: CatalogCardProps)
 
           {/* Badges de tipo e 18+ */}
           <div className="absolute top-2 left-2 z-10">
-            <Badge variant={isGame ? 'default' : 'secondary'}>
-              {isGame ? 'Jogo' : 'Anime'}
-            </Badge>
           </div>
           {isAdult && (
             <div className="absolute top-2 right-2 z-10">
