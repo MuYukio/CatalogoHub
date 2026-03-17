@@ -7,9 +7,12 @@
   const inter = Inter({ subsets: ['latin'] })
 
   export const metadata: Metadata = {
-    title: 'CatalogoHub',
-    description: 'Gerencie sua colecao de jogos e animes favoritos',
-  }
+  title: 'CatalogoHub',
+  description: 'Gerencie sua colecao de jogos e animes favoritos',
+  verification: {
+    google: 'UijuhN281tQwHGm5aGbT3UOyJ0FokSrcljqsqyVMwaM',
+  },
+}
 
   export default function RootLayout({
     children,
