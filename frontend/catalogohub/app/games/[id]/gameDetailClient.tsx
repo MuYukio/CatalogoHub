@@ -86,10 +86,15 @@ export default function GameDetailClient({ params }: GameDetailPageProps) {
     platforms: game.platforms,       
     isAdultContent: game.isAdultContent,
     playtime: game.playtime,
-     description: game.description,
+    description: game.description,
+    metacritic: game.metacritic,
+    tags: game.tags,
+    developer: game.developer,
+    publisher: game.publisher,
   };
 
   return (
+    
     <DetailPage
       data={detailData}
       type="game"
@@ -97,5 +102,6 @@ export default function GameDetailClient({ params }: GameDetailPageProps) {
       onToggleFavorite={isAuthenticated ? () => toggleFavorite() : undefined}
       isTogglingFavorite={isTogglingFavorite}
     />
+    
   );
 }

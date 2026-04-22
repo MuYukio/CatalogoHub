@@ -22,6 +22,9 @@ export interface Game {
   contentWarnings: string[];
   esrbRating?: string;
   description?: string;
+  tags?: string[];
+  developer?: string;
+  publisher?: string;
 }
 
 export interface Anime {
@@ -42,6 +45,11 @@ export interface Anime {
   isAdultContent: boolean;
   contentWarnings: string[];
   ageRating?: string;
+  rank?: number;
+  popularity?: number;
+  source?: string;
+  aired?: string;
+  pictures?: string[];
 }
 
 export interface Favorite {
@@ -88,4 +96,43 @@ export interface ApiResponse<T> {
     currentPage: number;
     hasNextPage: boolean;
   };
+}
+export interface CatalogResponse<T> {
+  results: T[];
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  totalCount: number;
+}
+
+export interface DetailData {
+  id: number | string;
+  title: string;
+  backgroundImage?: string;
+  imageUrl?: string;
+  description?: string;
+  rating?: number;
+  score?: number;
+  year?: string | number;
+  genres?: string[];
+  isAdultContent?: boolean;
+  episodes?: number;
+  status?: string;
+  studio?: string;
+  season?: string;
+  rank?: number;
+  popularity?: number;
+  source?: string;
+  aired?: string;
+  platforms?: string[];
+  developer?: string;
+  publisher?: string;
+  playtime?: number;
+  metacritic?: number;
+  tags?: string[];
+}
+export interface Genre {
+  id: number;
+  name: string;
+  slug: string;
 }

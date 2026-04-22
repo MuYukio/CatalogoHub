@@ -1,28 +1,36 @@
 @import "tailwindcss";
 
+/* ───────────── TEMA CLARO (original) ───────────── */
 :root {
-  --background: 0 0% 100%;
+  --background: 220 20% 97%;
   --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
+  --card: 220 20% 99%;
   --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
+  --popover: 220 20% 99%;
   --popover-foreground: 222.2 84% 4.9%;
   --primary: 221.2 83.2% 53.3%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
+  --secondary: 220 20% 93%;
   --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
+  --muted: 220 20% 93%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
+  --accent: 220 20% 93%;
   --accent-foreground: 222.2 47.4% 11.2%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
+  --border: 214.3 31.8% 87%;
+  --input: 214.3 31.8% 87%;
   --ring: 221.2 83.2% 53.3%;
   --radius: 0.5rem;
+
+  /* Tokens para gradientes e textos (claro) – opcional, você pode manter os originais */
+  --ch-blue: #4a90e8;
+  --ch-purple: #9b6ef3;
+  --ch-cyan: #38d9d9;
+  --ch-pink: #e87abd;
 }
 
+/* ───────────── TEMA ESCURO (editorial dark) ───────────── */
 .dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
@@ -43,8 +51,26 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
+
+  /* Tokens dark editorial */
+  --ch-bg: #0a0a0f;
+  --ch-surface: #111118;
+  --ch-surface2: #1a1a24;
+  --ch-border: rgba(255,255,255,0.06);
+  --ch-border2: rgba(255,255,255,0.10);
+  --ch-text: #f0f0f8;
+  --ch-muted: #8888aa;
+  --ch-blue: #4a90e8;
+  --ch-blue-dim: rgba(74,144,232,0.10);
+  --ch-blue-mid: rgba(74,144,232,0.25);
+  --ch-purple: #9b6ef3;
+  --ch-purple-dim: rgba(155,110,243,0.10);
+  --ch-purple-mid: rgba(155,110,243,0.25);
+  --ch-pink: #e87abd;
+  --ch-cyan: #38d9d9;
 }
 
+/* ── Base (herda as cores do tema) ── */
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -69,23 +95,169 @@
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-
-*:not(.carousel-slide):not(.carousel-slide *) {
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    opacity 0.2s ease,
-    transform 0.2s ease;
+/* Ruído de fundo APENAS no tema escuro */
+.dark body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
 }
 
+/* ── Tipografia de display (usa as fontes que você vai instalar no layout) ── */
+.font-display {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+}
 
+/* ── Utilitários de superfície (tema escuro usa as variáveis customizadas) ── */
+.ch-surface {
+  background: var(--ch-surface, hsl(var(--card)));
+  border: 1px solid var(--ch-border, hsl(var(--border)));
+}
+.ch-surface2 {
+  background: var(--ch-surface2, hsl(var(--secondary)));
+  border: 1px solid var(--ch-border2, hsl(var(--border)));
+}
+
+/* ── Gradientes de texto (funcionam nos dois temas) ── */
+.ch-text-games {
+  background: linear-gradient(135deg, var(--ch-blue, #4a90e8), var(--ch-cyan, #38d9d9));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ch-text-animes {
+  background: linear-gradient(135deg, var(--ch-purple, #9b6ef3), var(--ch-pink, #e87abd));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ch-text-mixed {
+  background: linear-gradient(135deg, var(--ch-blue, #4a90e8), var(--ch-purple, #9b6ef3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Eyebrow badge ── */
+.ch-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ch-eyebrow-games {
+  color: var(--ch-blue, #4a90e8);
+  border: 1px solid var(--ch-blue-mid, rgba(74,144,232,0.25));
+  background: var(--ch-blue-dim, rgba(74,144,232,0.10));
+}
+.ch-eyebrow-animes {
+  color: var(--ch-purple, #9b6ef3);
+  border: 1px solid var(--ch-purple-mid, rgba(155,110,243,0.25));
+  background: var(--ch-purple-dim, rgba(155,110,243,0.10));
+}
+
+/* ── Cards ── */
+.ch-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+   transition: border-color 0.2s ease
+}
+
+.dark .ch-card-games:hover {
+  border-color: rgba(74,144,232,0.25);
+}
+.dark .ch-card-animes:hover {
+  border-color: rgba(155,110,243,0.25);
+}
+
+/* ── Inputs / Search ── */
+.ch-input-wrap {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 16px;
+  transition: border-color 0.2s;
+}
+.ch-input-wrap:focus-within {
+  border-color: hsl(var(--ring));
+}
+.dark .ch-input-wrap:focus-within {
+  border-color: var(--ch-blue-mid, hsl(var(--ring)));
+}
+.dark .ch-input-wrap.anime:focus-within {
+  border-color: var(--ch-purple-mid, hsl(var(--ring)));
+}
+
+/* ── Botões ── */
+.ch-btn-games {
+  background: linear-gradient(135deg, #185fa5, #378add);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.ch-btn-games:hover {
+  background: linear-gradient(135deg, #378add, #4a90e8);
+}
+.ch-btn-animes {
+  background: linear-gradient(135deg, #533ab7, #9b6ef3);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.ch-btn-animes:hover {
+  background: linear-gradient(135deg, #9b6ef3, #e87abd);
+}
+.ch-btn-outline {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  border-radius: 12px;
+}
+.ch-btn-outline:hover {
+  background: hsl(var(--accent));
+}
+
+/* ── Seção hero em páginas internas ── */
+.ch-page-hero {
+  padding: 64px 0 40px;
+  position: relative;
+}
+
+/* ── Divisor ── */
+.ch-divider {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 48px 0;
+}
+
+/* ── Scrollbar (apenas escuro) ── */
+.dark ::-webkit-scrollbar       { width: 6px; }
+.dark ::-webkit-scrollbar-track { background: var(--ch-bg, #0a0a0f); }
+.dark ::-webkit-scrollbar-thumb { background: var(--ch-surface2, #1a1a24); border-radius: 3px; }
+
+/* ── Overlay do carrossel (preservado) ── */
 .carousel-overlay {
-  @apply absolute inset-0;
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.9) 0%,
@@ -102,11 +274,13 @@ body {
   );
 }
 
-
-.carousel-slide {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
+/* Transições originais (mantidas) */
+*:not(.carousel-slide):not(.carousel-slide *) {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 img:not([data-nimg]) {

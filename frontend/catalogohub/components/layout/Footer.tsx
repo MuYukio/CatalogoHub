@@ -6,7 +6,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-border/40 mt-16 bg-gradient-to-b from-background to-muted/20">
+    <footer className="border-t border-border bg-card mt-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
@@ -33,7 +33,7 @@ export default function Footer() {
                 { href: 'https://facebook.com', icon: <Facebook size={16} />, label: 'Facebook' },
               ].map(s => (
                 <Button key={s.label} variant="outline" size="icon"
-                  className="h-9 w-9 rounded-full hover:bg-primary/10 hover:scale-105 transition-all"
+                  className="h-9 w-9 rounded-full hover:bg-primary/10 hover:scale-105 transition-all ch-btn-outline"
                   asChild
                 >
                   <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
@@ -53,7 +53,6 @@ export default function Footer() {
               {[
                 { href: '/', label: 'Home', icon: <Home size={14} /> },
                 { href: '/catalog', label: 'Catálogo', icon: <BookOpen size={14} /> },
-                { href: '/favorites', label: 'Favoritos', icon: <Heart size={14} /> },
                 { href: '/profile', label: 'Perfil', icon: <User size={14} /> },
               ].map(link => (
                 <li key={link.href}>
@@ -77,9 +76,8 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { href: '/games', label: 'Jogos Populares', icon: <Gamepad2 size={14} /> },
-                { href: '/animes', label: 'Animes da Temporada', icon: <Tv size={14} /> },
-                { href: '/trending', label: 'Em Alta', icon: <Sparkles size={14} /> },
+                { href: '/catalog', label: 'Jogos Populares', icon: <Gamepad2 size={14} /> },
+                { href: '/catalog?type=animes', label: 'Animes da Temporada', icon: <Tv size={14} /> },
               ].map(item => (
                 <li key={item.href}>
                   <Link href={item.href}
@@ -118,16 +116,16 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/10">
+            <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Precisa de ajuda? Respondemos em até 24h. 🚀
+                Precisa de ajuda? Respondemos em até 24h. 
               </p>
             </div>
           </div>
         </div>
 
         {/* Rodapé */}
-        <div className="mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
             © {currentYear} <span className="font-semibold text-foreground">CatalogoHub</span>. Todos os direitos reservados.
           </p>

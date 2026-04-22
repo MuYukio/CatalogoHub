@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Loader2,
   Eye,
@@ -17,7 +25,7 @@ import {
   Mail,
   Lock,
   User,
-  Calendar,
+  Calendar as CalendarIcon,
   Gamepad2,
   Tv,
   Star,
@@ -28,7 +36,18 @@ import { useRegister } from "@/hooks/shared/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import PasswordStrengthMeter from "@/components/auth/PasswordStrengthMeter";
 import { BackHomeButton } from "../ui/back-home-button";
+import { cn } from "@/lib/utils";
 import { DatePicker } from "../ui/date-picker";
+
+function calcularIdade(dataNascimento: Date): number {
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+  const mes = hoje.getMonth() - dataNascimento.getMonth();
+  if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
+    idade--;
+  }
+  return idade;
+}
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +67,10 @@ export default function RegisterForm() {
     formState: { errors },
     setValue,
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema) as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(
+      registerSchema,
+    ) as unknown as Resolver<RegisterFormData>,
     defaultValues: {
       name: "",
       email: "",
@@ -60,8 +82,11 @@ export default function RegisterForm() {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const password = watch("password");
+  // eslint-disable-next-line react-hooks/incompatible-library
   const allowAdultContent = watch("allowAdultContent");
+  // eslint-disable-next-line react-hooks/incompatible-library
   const acceptTerms = watch("acceptTerms");
 
   const onSubmit = (data: RegisterFormData) => {
@@ -83,10 +108,16 @@ export default function RegisterForm() {
           });
           setTimeout(() => router.push("/profile"), 2000);
         },
-        onError: (error: any) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            "Erro ao criar conta. Tente novamente.";
+        onError: (error: unknown) => {
+          let errorMessage = "Erro ao criar conta. Tente novamente.";
+          if (error && typeof error === "object" && "response" in error) {
+            const axiosError = error as {
+              response?: { data?: { message?: string } };
+            };
+            errorMessage = axiosError.response?.data?.message || errorMessage;
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
           showToast({
             title: "Erro no registro",
             description: errorMessage,
@@ -153,22 +184,10 @@ export default function RegisterForm() {
     );
   }
 
-  function calcularIdade(dataNascimento: Date): number {
-    const hoje = new Date();
-    let idade = hoje.getFullYear() - dataNascimento.getFullYear();
-    const mes = hoje.getMonth() - dataNascimento.getMonth();
-    if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
-      idade--;
-    }
-    return idade;
-  }
-
   return (
     <div className="min-h-screen flex bg-background">
-      {/* formulário */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 overflow-y-auto">
         <div className="w-full max-w-md">
-          {/* Logo mobile */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
             <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Gamepad2 className="h-6 w-6 text-white" />
@@ -197,19 +216,32 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          {/* Erro global */}
           {registerMutation.isError && (
             <div className="flex items-center gap-3 p-4 mb-6 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400">
               <AlertCircle className="h-5 w-5 flex-shrink-0" />
               <p className="text-sm font-medium">
-                {(registerMutation.error as any)?.response?.data?.message ||
-                  "Erro ao criar conta."}
+                {(() => {
+                  const error = registerMutation.error;
+                  let message = "Erro ao criar conta.";
+                  if (
+                    error &&
+                    typeof error === "object" &&
+                    "response" in error
+                  ) {
+                    const axiosError = error as {
+                      response?: { data?: { message?: string } };
+                    };
+                    message = axiosError.response?.data?.message || message;
+                  } else if (error instanceof Error) {
+                    message = error.message;
+                  }
+                  return message;
+                })()}
               </p>
             </div>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nome */}
             <div className="space-y-2">
               <Label
                 htmlFor="name"
@@ -223,7 +255,10 @@ export default function RegisterForm() {
                 type="text"
                 placeholder="Seu nome completo"
                 disabled={registerMutation.isPending}
-                className={`h-12 rounded-xl border-2 transition-colors focus:border-blue-500 ${errors.name ? "border-red-400" : "border-border"}`}
+                className={cn(
+                  "h-12 rounded-xl border-2 transition-colors focus:border-blue-500",
+                  errors.name ? "border-red-400" : "border-border",
+                )}
                 {...register("name")}
               />
               {errors.name && (
@@ -234,7 +269,6 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
               <Label
                 htmlFor="email"
@@ -247,7 +281,10 @@ export default function RegisterForm() {
                 type="email"
                 placeholder="seu@email.com"
                 disabled={registerMutation.isPending}
-                className={`h-12 rounded-xl border-2 transition-colors focus:border-blue-500 ${errors.email ? "border-red-400" : "border-border"}`}
+                className={cn(
+                  "h-12 rounded-xl border-2 transition-colors focus:border-blue-500",
+                  errors.email ? "border-red-400" : "border-border",
+                )}
                 {...register("email")}
               />
               {errors.email && (
@@ -258,10 +295,9 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Idade */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                 Data de nascimento
               </Label>
               <DatePicker
@@ -273,9 +309,8 @@ export default function RegisterForm() {
                   }
                 }}
                 disabled={registerMutation.isPending}
-                className={errors.age ? "border-red-400" : "border-border"}
+                className={errors.age ? "border-red-400" : ""}
               />
-              
               {errors.age && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
@@ -284,7 +319,6 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Senha */}
             <div className="space-y-2">
               <Label
                 htmlFor="password"
@@ -298,7 +332,10 @@ export default function RegisterForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Crie uma senha forte"
                   disabled={registerMutation.isPending}
-                  className={`h-12 rounded-xl border-2 pr-12 transition-colors focus:border-blue-500 ${errors.password ? "border-red-400" : "border-border"}`}
+                  className={cn(
+                    "h-12 rounded-xl border-2 pr-12 transition-colors focus:border-blue-500",
+                    errors.password ? "border-red-400" : "border-border",
+                  )}
                   {...register("password")}
                 />
                 <button
@@ -319,7 +356,6 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Confirmar Senha */}
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
@@ -333,7 +369,10 @@ export default function RegisterForm() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Repita sua senha"
                   disabled={registerMutation.isPending}
-                  className={`h-12 rounded-xl border-2 pr-12 transition-colors focus:border-blue-500 ${errors.confirmPassword ? "border-red-400" : "border-border"}`}
+                  className={cn(
+                    "h-12 rounded-xl border-2 pr-12 transition-colors focus:border-blue-500",
+                    errors.confirmPassword ? "border-red-400" : "border-border",
+                  )}
                   {...register("confirmPassword")}
                 />
                 <button
@@ -357,12 +396,10 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Checkboxes */}
             <div className="space-y-3 pt-1">
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
-                  id="allowAdultContent"
                   checked={allowAdultContent}
                   onChange={(e) =>
                     setValue("allowAdultContent", e.target.checked)
@@ -383,7 +420,6 @@ export default function RegisterForm() {
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
-                  id="acceptTerms"
                   checked={acceptTerms}
                   onChange={(e) => setValue("acceptTerms", e.target.checked)}
                   disabled={registerMutation.isPending}
@@ -418,7 +454,6 @@ export default function RegisterForm() {
               )}
             </div>
 
-            {/* Submit */}
             <Button
               type="submit"
               disabled={registerMutation.isPending}
@@ -436,7 +471,6 @@ export default function RegisterForm() {
         </div>
       </div>
 
-      {/* visual  */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 flex-col items-center justify-center p-12">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" />
@@ -452,7 +486,6 @@ export default function RegisterForm() {
           }}
         />
 
-        {/* Ícones flutuantes */}
         <div
           className="absolute top-20 right-16 opacity-20 animate-bounce"
           style={{ animationDelay: "0s", animationDuration: "3s" }}

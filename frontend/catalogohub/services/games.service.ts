@@ -1,10 +1,10 @@
 import { api } from '@/lib/api'
-import { Game } from '@/types'
+import { Game, CatalogResponse, Genre } from '@/types'
 
 export interface GameSearchResponse {
   results: Game[]
   hasNextPage: boolean
-  totalCount?:number
+  totalCount?: number
 }
 
 export interface GamesSearchParams {
@@ -20,10 +20,8 @@ class GameService {
         params: { query, page, limit },
         timeout: 15000
       })
-
       const data = response.data
-      
-       if (Array.isArray(data)) {
+      if (Array.isArray(data)) {
         return {
           results: data,
           hasNextPage: data.length === limit,
@@ -35,35 +33,52 @@ class GameService {
         hasNextPage: data.hasNextPage || data.hasnextpage || false,
         totalCount: data.totalCount || data.totalcount || (data.results ? data.results.length : 0)
       }
-      
     } catch (error) {
-
       console.error('Error searching games:', error)
-      return {
-        results: [],
-        hasNextPage: false,
-        totalCount: 0
+      return { results: [], hasNextPage: false, totalCount: 0 }
     }
   }
-}
+
+  async getCatalog(params: {
+    page?: number
+    pageSize?: number
+    search?: string
+    genres?: string[]
+    platform?: string
+    ordering?: string
+    includeAdult?: boolean
+  }): Promise<CatalogResponse<Game>> {
+    const query = new URLSearchParams()
+    if (params.page)         query.set('page',        String(params.page))
+    if (params.pageSize)     query.set('pageSize',     String(params.pageSize))
+    if (params.search)       query.set('search',       params.search)
+    if (params.genres)        query.set('genres',        params.genres.join(','))
+    if (params.platform)     query.set('platform',     params.platform)
+    if (params.ordering)     query.set('ordering',     params.ordering)
+    if (params.includeAdult) query.set('includeAdult', String(params.includeAdult))
+    const response = await api.get(`/api/Games/catalog?${query.toString()}`)
+    return response.data
+  }
 
   async getById(id: number): Promise<Game> {
     const response = await api.get(`/api/games/${id}`)
     return response.data
   }
 
-   async getRecentGames(limit: number = 5, includeAdult: boolean = false): Promise<Game[]> {
-    console.log(`Fetching recent games: limit=${limit}, includeAdult=${includeAdult}`);
+  async getRecentGames(limit: number = 5, includeAdult: boolean = false): Promise<Game[]> {
     try {
-      const response = await api.get(`/api/games/recent?limit=${limit}&includeAdult=${includeAdult}`);
-      console.log('Games API response:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching games:', error.response?.data || error.message);
-      throw error;
+      const response = await api.get(`/api/games/recent?limit=${limit}&includeAdult=${includeAdult}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching games:', error)
+      throw error
     }
   }
-
+  
+  async getGenres(): Promise<Genre[]> {
+  const response = await api.get('/api/Games/genres');
+  return response.data;
+}
 }
 
 export const gamesService = new GameService()

@@ -23,6 +23,7 @@ export default function AnimeDetailClient({ params }: AnimeDetailPageProps) {
 
   const { data: anime, isLoading, isError } = useAnime(id);
 
+
   const { data: favorites = [] } = useQuery({
     queryKey: ['favorites'],
     queryFn: () => favoritesService.getAll(),
@@ -76,19 +77,23 @@ export default function AnimeDetailClient({ params }: AnimeDetailPageProps) {
   }
 
   const detailData: DetailData = {
-    id: anime.malId,             
+    id: anime.malId,
     title: anime.title,
     imageUrl: anime.imageUrl,
-    backgroundImage: anime.imageUrl, 
-    description: anime.synopsis,   
+    backgroundImage: anime.imageUrl,
+    description: anime.synopsis,
     score: anime.score ?? undefined,
     year: anime.year,
-    genres: anime.genres,            
+    genres: anime.genres,
     isAdultContent: anime.isAdultContent,
     episodes: anime.episodes,
     status: anime.status,
-    studio: anime.studios?.[0],     
-    season: anime.season,
+    studio: anime.studios?.[0],
+    season: anime.season,       
+    rank: anime.rank,
+    popularity: anime.popularity,
+    source: anime.source,
+    aired: anime.aired,
   };
 
   return (

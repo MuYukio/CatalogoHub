@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Game, Anime } from "@/types";
 import { CatalogCard } from "./CatalogCard";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ interface CatalogGridProps {
   type: "games" | "animes";
   isLoading: boolean;
   includeAdult?: boolean;
+  variant?: 'default'| 'compact';
 }
 
 export default function CatalogGrid({
@@ -18,42 +19,28 @@ export default function CatalogGrid({
   type,
   isLoading,
   includeAdult = false,
+  variant = 'default'
 }: CatalogGridProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [displayedItems, setDisplayedItems] = useState<(Game | Anime)[]>([]);
 
-  useEffect(() => {
-    console.log(" DEBUG - CatalogGrid recebeu:", {
-      itemsCount: items?.length,
-      type,
-      includeAdult,
-      sampleItem: items?.[0],
-    });
-  }, [items, type, includeAdult]);
+  const displayedItems = useMemo(() => {
+    if (!items) return [];
 
-  useEffect(() => {
-    if (!items) {
-      setDisplayedItems([]);
-      return;
-    }
     const filtered = items.filter((item) => {
-
       if (includeAdult) return true;
-
       const isAdult = item.isAdultContent || false;
-
-      if (isAdult) {
-        console.log(" Item filtrado (adulto):", {
-          title: type === "games" ? (item as Game).name : (item as Anime).title,
-          isAdult,
-          item,
-        });
-      }
-
       return !isAdult;
     });
 
-    setDisplayedItems(filtered);
+    const uniqueItems = new Map();
+    filtered.forEach((item) => {
+      const id = type === "games" ? (item as Game).id : (item as Anime).malId;
+      if (!uniqueItems.has(id)) {
+        uniqueItems.set(id, item);
+      }
+    });
+
+    return Array.from(uniqueItems.values());
   }, [items, type, includeAdult]);
 
   if (isLoading) {
@@ -70,7 +57,7 @@ export default function CatalogGrid({
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
               : "space-y-4"
           }
         >
@@ -111,12 +98,8 @@ export default function CatalogGrid({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center">
         <div>
-          <h3 className="text-lg font-semibold">
-            {displayedItems.length} {type === "games" ? "jogos" : "animes"}{" "}
-            encontrados
-          </h3>
           {!includeAdult && displayedItems.length < (items?.length || 0) && (
             <p className="text-sm text-muted-foreground">
               {(items?.length || 0) - displayedItems.length} itens adultos
@@ -144,31 +127,27 @@ export default function CatalogGrid({
               <List className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filtros
-          </Button>
         </div>
       </div>
+
       <div
         className={
           viewMode === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
             : "space-y-4"
         }
       >
         {displayedItems.map((item, index) => {
           const itemId =
             type === "games" ? (item as Game).id : (item as Anime).malId;
-
-          const uniqueKey = `${type}-${itemId || index}-${Date.now()}`;
-
+          const uniqueKey = `${type}-${itemId || index}`;
           return (
             <CatalogCard
               key={uniqueKey}
               item={item}
               type={type}
               viewMode={viewMode}
+              variant = {variant}
             />
           );
         })}
