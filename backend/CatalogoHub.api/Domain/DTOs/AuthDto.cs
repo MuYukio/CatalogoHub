@@ -59,4 +59,19 @@ namespace CatalogoHub.api.Domain.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
     }
+
+    public class UpdateProfileDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public int? Age { get; set; }          
+        public bool? AllowAdultContent { get; set; } 
+    }
+
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+
 }

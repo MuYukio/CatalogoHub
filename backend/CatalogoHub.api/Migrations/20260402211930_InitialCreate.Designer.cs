@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogoHub.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260303191611_SyncPendingChanges")]
-    partial class SyncPendingChanges
+    [Migration("20260402211930_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

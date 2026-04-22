@@ -12,181 +12,291 @@ namespace CatalogoHub.api.Infrastructure.Pdf
 
     public class PdfService : IPdfService
     {
+        private static readonly string ColorBg = "#0f1117";
+        private static readonly string ColorSurface = "#1a1d2e";
+        private static readonly string ColorSurfaceAlt = "#141622";
+        private static readonly string ColorAccentBlue = "#4f8ef7";
+        private static readonly string ColorAccentPurple = "#a855f7";
+        private static readonly string ColorAccentGreen = "#22c55e";
+        private static readonly string ColorBorder = "#2a2d3e";
+        private static readonly string ColorTextPrimary = "#f1f5f9";
+        private static readonly string ColorTextMuted = "#64748b";
+        private static readonly string ColorTextSub = "#94a3b8";
+        private static readonly string ColorGameBadge = "#1e3a5f";
+        private static readonly string ColorAnimeBadge = "#2d1b4e";
+
         public byte[] GenerateFavoritesPdf(FavoritesPdfDto pdfData)
         {
-     
+            var gamesCount = pdfData.Summary.GamesCount;
+            var animesCount = pdfData.Summary.AnimesCount;
+            var totalCount = pdfData.Summary.TotalItems;
 
             var document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
-                    // Configurações básicas da página
                     page.Size(PageSizes.A4);
-                    page.Margin(1, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(10));
+                    page.Margin(0);
+                    page.PageColor(ColorBg);
+                    page.DefaultTextStyle(x => x
+                        .FontFamily("Arial")
+                        .FontColor(ColorTextPrimary)
+                        .FontSize(10));
 
-                    // Cabeçalho SIMPLES
-                    page.Header()
-                        .Column(column =>
-                        {
-                            column.Item()
-                                .Text("CatalogoHub - Lista de Favoritos")
-                                .FontSize(16).Bold().FontColor(Colors.Blue.Darken3);
+                    // ── Header ────────────────────────────────────────────────
+                    page.Header().Element(BuildHeader(pdfData));
 
-                            column.Item()
-                                .Text($"Usuário: {pdfData.UserEmail}")
-                                .FontSize(10);
-
-                            column.Item()
-                                .Text($"Gerado em: {pdfData.GeneratedAt:dd/MM/yyyy HH:mm}")
-                                .FontSize(9).FontColor(Colors.Grey.Medium);
-                        });
-
-                    // Conteúdo PRINCIPAL
+                    // ── Content ───────────────────────────────────────────────
                     page.Content()
-                        .PaddingVertical(0.5f, Unit.Centimetre)
-                        .Column(column =>
+                        .PaddingHorizontal(28)
+                        .PaddingBottom(20)
+                        .Column(col =>
                         {
-                            // Seção de Resumo
-                            if (pdfData.Summary.TotalItems > 0)
+                            // Stats cards
+                            col.Item().PaddingBottom(20).Element(BuildStatsRow(totalCount, gamesCount, animesCount));
+
+                            // Section title
+                            col.Item().PaddingBottom(12).Row(row =>
                             {
-                                column.Item()
-                                    .Background(Colors.Grey.Lighten4)
-                                    .Border(1)
-                                    .BorderColor(Colors.Grey.Lighten2)
-                                    .Padding(10)
-                                    .Column(summaryColumn =>
-                                    {
-                                        summaryColumn.Item()
-                                            .Text("📊 Resumo")
-                                            .FontSize(12).Bold();
+                                row.AutoItem()
+                                    .Background(ColorAccentBlue)
+                                    .Width(3)
+                                    .Height(18);
 
-                                        summaryColumn.Item()
-                                            .PaddingTop(5)
-                                            .Row(row =>
-                                            {
-                                                row.RelativeItem()
-                                                    .Text($"Total: {pdfData.Summary.TotalItems}")
-                                                    .FontColor(Colors.Green.Darken2);
+                                row.AutoItem().Width(10);
 
-                                                row.RelativeItem()
-                                                    .Text($"🎮 Jogos: {pdfData.Summary.GamesCount}")
-                                                    .FontColor(Colors.Blue.Medium);
+                                row.RelativeItem()
+                                    .AlignMiddle()
+                                    .Text("Lista de Favoritos")
+                                    .FontSize(13)
+                                    .Bold()
+                                    .FontColor(ColorTextPrimary);
+                            });
 
-                                                row.RelativeItem()
-                                                    .Text($"🎬 Animes: {pdfData.Summary.AnimesCount}")
-                                                    .FontColor(Colors.Purple.Medium);
-                                            });
-                                    });
-
-                                column.Item().Height(10); // Espaço
-                            }
-
-                            // Lista de Itens
-                            column.Item()
-                                .Text("📋 Itens Favoritos")
-                                .FontSize(12).Bold();
-                                
-
+                            // Items
                             if (pdfData.Items.Any())
                             {
-                                // Tabela SIMPLIFICADA
-                                column.Item().Table(table =>
+                                for (int i = 0; i < pdfData.Items.Count; i++)
                                 {
-                                    // Configuração SIMPLES de colunas
-                                    table.ColumnsDefinition(columns =>
-                                    {
-                                        columns.ConstantColumn(25); // #
-                                        columns.RelativeColumn(3);  // Título
-                                        columns.RelativeColumn(1);  // Tipo
-                                        columns.RelativeColumn(1);  // Data
-                                    });
+                                    var item = pdfData.Items[i];
+                                    var isGame = item.Type == "Game";
+                                    var isEven = i % 2 == 0;
 
-                                    // Cabeçalho
-                                    table.Header(header =>
-                                    {
-                                        header.Cell().Text("#").Bold().FontSize(9);
-                                        header.Cell().Text("Título").Bold().FontSize(9);
-                                        header.Cell().Text("Tipo").Bold().FontSize(9);
-                                        header.Cell().Text("Data").Bold().FontSize(9);
-                                    });
+                                    col.Item()
+                                        .PaddingBottom(4)
+                                        .Element(BuildItemRow(item, i + 1, isGame, isEven));
+                                }
 
-                                    // Linhas
-                                    for (int i = 0; i < pdfData.Items.Count; i++)
-                                    {
-                                        var item = pdfData.Items[i];
-                                        var backgroundColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
-                                        var typeColor = item.Type == "Game" ? Colors.Blue.Medium : Colors.Purple.Medium;
-
-                                        // Número
-                                        table.Cell()
-                                            .Background(backgroundColor)
-                                            .PaddingVertical(3)
-                                            .Text($"{i + 1}")
-                                            .FontSize(9);
-
-                                        // Título
-                                        table.Cell()
-                                            .Background(backgroundColor)
-                                            .PaddingVertical(3)
-                                            .Text(item.Title)
-                                            .FontSize(9);
-
-                                        // Tipo
-                                        table.Cell()
-                                            .Background(backgroundColor)
-                                            .PaddingVertical(3)
-                                            .Text(item.Type)
-                                            .FontSize(9)
-                                            .FontColor(typeColor);
-
-                                        // Data
-                                        table.Cell()
-                                            .Background(backgroundColor)
-                                            .PaddingVertical(3)
-                                            .Text(item.AddedDate.ToString("dd/MM/yy"))
-                                            .FontSize(9);
-                                    }
+                                // Footer count
+                                col.Item().PaddingTop(16).Row(row =>
+                                {
+                                    row.RelativeItem()
+                                        .BorderTop(1)
+                                        .BorderColor(ColorBorder)
+                                        .PaddingTop(10)
+                                        .Text($"{totalCount} {(totalCount == 1 ? "item" : "itens")} no total")
+                                        .FontSize(9)
+                                        .FontColor(ColorTextMuted);
                                 });
                             }
                             else
                             {
-                                // Mensagem sem itens
-                                column.Item()
-                                    .Background(Colors.Yellow.Lighten5)
-                                    .Padding(20)
+                                col.Item()
+                                    .Background(ColorSurface)
+                                    .Border(1)
+                                    .BorderColor(ColorBorder)
+                                    .Padding(32)
                                     .AlignCenter()
-                                    .Text("📭 Nenhum item favoritado ainda!")
+                                    .Text("Nenhum item favoritado ainda.")
                                     .Italic()
-                                    .FontColor(Colors.Orange.Darken3);
-                            }
-
-                            // Rodapé da seção
-                            if (pdfData.Items.Any())
-                            {
-                                column.Item()
-                                    .PaddingTop(10)
-                                    .Text($"Total de itens listados: {pdfData.Items.Count}")
-                                    .FontSize(9)
-                                    .FontColor(Colors.Grey.Darken1);
+                                    .FontColor(ColorTextMuted);
                             }
                         });
 
-                    // Rodapé da página
-                    page.Footer()
-                        .AlignCenter()
-                        .Text(text =>
-                        {
-                            text.Span("Página ").FontSize(8);
-                            text.CurrentPageNumber().FontSize(8);
-                            text.Span(" de ").FontSize(8);
-                            text.TotalPages().FontSize(8);
-                        });
+                    // ── Footer ────────────────────────────────────────────────
+                    page.Footer().Element(BuildFooter(pdfData));
                 });
             });
 
             return document.GeneratePdf();
         }
+
+        // ── Builders ──────────────────────────────────────────────────────────
+
+        private Action<IContainer> BuildHeader(FavoritesPdfDto pdfData) => container =>
+        {
+            container
+                .Background(ColorSurface)
+                .BorderBottom(1)
+                .BorderColor(ColorAccentBlue)
+                .PaddingHorizontal(28)
+                .PaddingVertical(20)
+                .Row(row =>
+                {
+                    // Logo + título
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Row(r =>
+                        {
+                            r.AutoItem()
+                                .Background(ColorAccentBlue)
+                                .Width(4)
+                                .Height(24);
+
+                            r.AutoItem().Width(10);
+
+                            r.RelativeItem().AlignMiddle().Column(c =>
+                            {
+                                c.Item()
+                                    .Text("CatalogoHub")
+                                    .FontSize(20)
+                                    .Bold()
+                                    .FontColor(ColorTextPrimary);
+
+                                c.Item()
+                                    .Text("Lista de Favoritos")
+                                    .FontSize(10)
+                                    .FontColor(ColorAccentBlue);
+                            });
+                        });
+
+                        col.Item().PaddingTop(10).Text(pdfData.UserEmail)
+                            .FontSize(9)
+                            .FontColor(ColorTextMuted);
+                    });
+
+                    // Data geração
+                    row.AutoItem().AlignRight().AlignBottom().Column(col =>
+                    {
+                        col.Item()
+                            .Text("Gerado em")
+                            .FontSize(8)
+                            .FontColor(ColorTextMuted)
+                            .AlignRight();
+
+                        col.Item()
+                            .Text(pdfData.GeneratedAt.ToString("dd/MM/yyyy · HH:mm"))
+                            .FontSize(9)
+                            .FontColor(ColorTextSub)
+                            .AlignRight();
+                    });
+                });
+        };
+
+        private Action<IContainer> BuildStatsRow(int total, int games, int animes) => container =>
+        {
+            container.Row(row =>
+            {
+                row.RelativeItem().Element(StatCard("Total", total.ToString(), ColorAccentGreen, "itens favoritados"));
+                row.ConstantItem(10);
+                row.RelativeItem().Element(StatCard("Jogos", games.ToString(), ColorAccentBlue, "na sua lista"));
+                row.ConstantItem(10);
+                row.RelativeItem().Element(StatCard("Animes", animes.ToString(), ColorAccentPurple, "na sua lista"));
+            });
+        };
+
+        private Action<IContainer> StatCard(string label, string value, string accentColor, string sub) => c =>
+        {
+            c.Background(ColorSurface)
+             .Border(1)
+             .BorderColor(ColorBorder)
+             .BorderTop(2)
+             .BorderColor(accentColor)
+             .Padding(12)
+             .Column(col =>
+             {
+                 col.Item().Text(label).FontSize(8).FontColor(ColorTextMuted);
+                 col.Item().PaddingTop(2).Text(value).FontSize(22).Bold().FontColor(accentColor);
+                 col.Item().Text(sub).FontSize(7).FontColor(ColorTextMuted);
+             });
+        };
+
+        private Action<IContainer> BuildItemRow(FavoritePdfItemDto item, int index, bool isGame, bool isEven) => container =>
+        {
+            var bgColor = isEven ? ColorSurfaceAlt : ColorSurface;
+            var badgeBg = isGame ? ColorGameBadge : ColorAnimeBadge;
+            var badgeColor = isGame ? ColorAccentBlue : ColorAccentPurple;
+            var typeLabel = isGame ? "JOGO" : "ANIME";
+
+            container
+                .Background(bgColor)
+                .Border(1)
+                .BorderColor(ColorBorder)
+                .PaddingHorizontal(14)
+                .PaddingVertical(8)
+                .Row(row =>
+                {
+                    // Número
+                    row.ConstantItem(28)
+                        .AlignMiddle()
+                        .Text($"{index:D2}")
+                        .FontSize(9)
+                        .FontColor(ColorTextMuted);
+
+                    // Barra lateral colorida
+                    row.ConstantItem(3)
+                        .Background(badgeColor)
+                        .AlignMiddle()
+                        .Height(20);
+
+                    row.ConstantItem(10);
+
+                    // Título
+                    row.RelativeItem()
+                        .AlignMiddle()
+                        .Text(item.Title)
+                        .FontSize(10)
+                        .FontColor(ColorTextPrimary);
+
+                    // Badge tipo
+                    row.ConstantItem(54)
+                        .AlignMiddle()
+                        .Background(badgeBg)
+                        .Border(1)
+                        .BorderColor(badgeColor)
+                        .Padding(3)
+                        .AlignCenter()
+                        .Text(typeLabel)
+                        .FontSize(7)
+                        .Bold()
+                        .FontColor(badgeColor);
+
+                    row.ConstantItem(10);
+
+                    // Data
+                    row.ConstantItem(52)
+                        .AlignMiddle()
+                        .AlignRight()
+                        .Text(item.AddedDate.ToString("dd/MM/yy"))
+                        .FontSize(8)
+                        .FontColor(ColorTextMuted);
+                });
+        };
+
+        private Action<IContainer> BuildFooter(FavoritesPdfDto pdfData) => container =>
+        {
+            container
+                .Background(ColorSurfaceAlt)
+                .BorderTop(1)
+                .BorderColor(ColorBorder)
+                .PaddingHorizontal(28)
+                .PaddingVertical(10)
+                .Row(row =>
+                {
+                    row.RelativeItem()
+                        .AlignMiddle()
+                        .Text("catalogohub.vercel.app")
+                        .FontSize(8)
+                        .FontColor(ColorTextMuted);
+
+                    row.AutoItem().AlignRight().Text(text =>
+                    {
+                        text.Span("Página ").FontSize(8).FontColor(ColorTextMuted);
+                        text.CurrentPageNumber().FontSize(8).FontColor(ColorTextSub);
+                        text.Span(" / ").FontSize(8).FontColor(ColorTextMuted);
+                        text.TotalPages().FontSize(8).FontColor(ColorTextSub);
+                    });
+                });
+        };
     }
 }

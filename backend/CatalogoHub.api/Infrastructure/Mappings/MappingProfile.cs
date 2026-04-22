@@ -64,13 +64,23 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score ?? 0))
             .ForMember(dest => dest.Episodes, opt => opt.MapFrom(src => src.Episodes ?? 0))
             .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                src.Genres.Select(g => g.Name).ToList()));
-
+                src.Genres.Select(g => g.Name).ToList()))
+            .ForMember(dest => dest.Rank, opt => opt.MapFrom(src => src.Rank))
+            .ForMember(dest => dest.Popularity, opt => opt.MapFrom(src => src.Popularity))
+            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => src.Source))
+            .ForMember(dest => dest.Aired, opt => opt.MapFrom(src => src.Aired != null ? src.Aired.String : null));
 
         CreateMap<RawgGame, GameDto>()
             .ForMember(dest => dest.Platforms, opt => opt.MapFrom<GamePlatformsResolver>())
             .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
                 src.Genres.Select(g => g.Name).ToList()))
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.DescriptionRaw));
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.DescriptionRaw))
+            .ForMember(dest => dest.Metacritic, opt => opt.MapFrom(src => src.Metacritic))
+            .ForMember(dest => dest.Tags, opt => opt.MapFrom(src =>
+                src.Tags.Select(t => t.Name).Take(10).ToList()))
+            .ForMember(dest => dest.Developer, opt => opt.MapFrom(src =>
+                src.Developers.Count > 0 ? src.Developers[0].Name : null))
+            .ForMember(dest => dest.Publisher, opt => opt.MapFrom(src =>
+                src.Publishers.Count > 0 ? src.Publishers[0].Name : null));
     }
 }

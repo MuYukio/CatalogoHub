@@ -78,6 +78,18 @@ public class JikanAnimeData
 
     [JsonPropertyName("genres")]
     public List<JikanGenre> Genres { get; set; } = new();
+
+    [JsonPropertyName("rank")]
+    public int? Rank { get; set; }
+
+    [JsonPropertyName("popularity")]
+    public int? Popularity { get; set; }
+
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
+
+    [JsonPropertyName("aired")]
+    public JikanAired? Aired { get; set; }
 }
 
 
@@ -113,4 +125,21 @@ public class JikanAnimeResponse
 {
     [JsonPropertyName("data")]
     public JikanAnimeData? Data { get; set; }
+}
+public class JikanAired
+{
+    [JsonPropertyName("string")]
+    public string? String { get; set; }
+}
+
+public class JikanGenresResponse
+{
+    [JsonPropertyName("data")]
+    public List<JikanGenreItem> Data { get; set; } = new();
+}
+
+public class JikanGenreItem
+{
+    [JsonPropertyName("mal_id")] public int MalId { get; set; }
+    [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
 }

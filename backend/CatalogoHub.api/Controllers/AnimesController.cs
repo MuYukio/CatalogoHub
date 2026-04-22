@@ -144,5 +144,30 @@ namespace CatalogoHub.api.Controllers
                 return StatusCode(500, new { message = "Error getting current season", error = ex.Message });
             }
         }
+        [HttpGet("catalog"), AllowAnonymous]
+        public async Task<IActionResult> GetAnimesCatalog(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null,
+            [FromQuery] string? genreIds = null,
+            [FromQuery] string? type = null,
+            [FromQuery] string? status = null,
+            [FromQuery] string ordering = "score")
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 40) pageSize = 20;
+
+            var result = await _jikanService.GetAnimesCatalogAsync(
+                page, pageSize, search, genreIds, type, status, ordering);
+
+            return Ok(result);
+        }
+
+        [HttpGet("genres"), AllowAnonymous]
+        public async Task<IActionResult> GetAnimeGenres()
+        {
+            var genres = await _jikanService.GetAnimeGenresAsync();
+            return Ok(genres);
+        }
     }
 }

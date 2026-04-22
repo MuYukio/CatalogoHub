@@ -68,5 +68,31 @@ namespace CatalogoHub.api.Controllers
             var games = await _rawgService.GetPopularGamesAsync(page, pageSize, includeAdult);
             return Ok(games);
         }
+
+        [HttpGet("catalog"), AllowAnonymous]
+        public async Task<IActionResult> GetGamesCatalog(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null,
+            [FromQuery] string? genres = null,
+            [FromQuery] string? platform = null,
+            [FromQuery] string ordering = "-rating",
+            [FromQuery] bool includeAdult = false)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 40) pageSize = 20;
+
+            var result = await _rawgService.GetGamesCatalogAsync(
+                page, pageSize, search, genres, platform, ordering, includeAdult);
+
+            return Ok(result);
+        }
+
+        [HttpGet("genres"), AllowAnonymous]
+        public async Task<IActionResult> GetGameGenres()
+        {
+            var genres = await _rawgService.GetGameGenresAsync();
+            return Ok(genres);
+        }
     }
 }

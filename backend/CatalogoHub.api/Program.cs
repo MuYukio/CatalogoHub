@@ -20,13 +20,23 @@ builder.Logging.SetMinimumLevel(LogLevel.Debug);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddHttpClient();
+// ── Cache ─────────────────────────────────────────────────────────────────────
+builder.Services.AddMemoryCache();
+
+// ── HTTP Clients ──────────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<RawgService>(client =>
 {
     client.BaseAddress = new Uri("https://api.rawg.io/api/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
-builder.Services.AddScoped<JikanService>();
+
+builder.Services.AddHttpClient<JikanService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.jikan.moe/v4/");
+    client.DefaultRequestHeaders.Add("User-Agent", "CatalogoHub/1.0");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddScoped<PdfService>();
 
@@ -55,8 +65,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowNextJs", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:3000",  
-                frontendUrl               
+                "http://localhost:3000",
+                frontendUrl
               )
               .AllowAnyHeader()
               .AllowAnyMethod();
@@ -88,16 +98,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddHttpClient<JikanService>(client =>
-{
-    client.BaseAddress = new Uri("https://api.jikan.moe/v4/");
-    client.DefaultRequestHeaders.Add("User-Agent", "CatalogoHub/1.0");
-    client.Timeout = TimeSpan.FromSeconds(30);
-});
-
 var app = builder.Build();
-builder.Services.AddLogging();
-
 
 using (var scope = app.Services.CreateScope())
 {

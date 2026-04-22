@@ -13,5 +13,10 @@
         public bool IsAdultContent { get; set; }
         public List<string> ContentWarnings { get; set; } = new();
         public string? Description { get; set; }
+
+        public int? Metacritic { get; set; }
+        public List<string> Tags { get; set; } = new();
+        public string? Developer { get; set; }
+        public string? Publisher { get; set; }
     }
 }
