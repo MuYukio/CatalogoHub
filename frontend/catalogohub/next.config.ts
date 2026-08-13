@@ -20,6 +20,10 @@ const nextConfig = {
         hostname: 'via.placeholder.com',
         pathname: '/**',
       },
+       {
+        protocol: 'https',
+        hostname: 's4.anilist.co',
+      },
     ],
   },
 };

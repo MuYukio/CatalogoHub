@@ -5,7 +5,7 @@ export interface AnimesCatalogParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  genreIds?: number[];
+  genreIds?: string[]; 
   type?: string;
   status?: string;
   ordering?: string;

@@ -34,6 +34,8 @@ import {
 import { Game, Anime, Genre } from "@/types";
 import CatalogGrid from "@/components/catalog/CatalogGrid";
 import { cn } from "@/lib/utils";
+import { GamesUnavailableModal } from "@/components/games/GamesUnavailableModal";
+
 
 type ContentType = "games" | "animes";
 type Theme = "blue" | "purple";
@@ -70,7 +72,7 @@ const GENRES_VISIBLE_DEFAULT = 12;
 
 interface GenreSelectorProps {
   genres: Genre[];
-  activeIds: number[];
+  activeIds: string[];   // <- era number[]
   activeSlugs: string[];
   isGames: boolean;
   theme: Theme;
@@ -129,7 +131,7 @@ function GenreSelector({
           {visible.map((g) => {
             const isActive = isGames
               ? activeSlugs.includes(g.slug)
-              : activeIds.includes(g.id);
+              : activeIds.includes(g.name);
             return (
               <motion.button
                 key={g.id}
@@ -171,7 +173,7 @@ function GenreSelector({
           {(isGames ? activeSlugs : activeIds).map((val) => {
             const g = isGames
               ? genres.find((x) => x.slug === val)
-              : genres.find((x) => x.id === val);
+              : genres.find((x) => x.name === val);
             if (!g) return null;
             return (
               <button
@@ -306,31 +308,30 @@ export default function CatalogClient() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>(() =>
     (searchParams.get("genres") || "").split(",").filter(Boolean),
   );
-  const [selectedGenreIds, setSelectedGenreIds] = useState<number[]>(() =>
-    (searchParams.get("genreIds") || "").split(",").map(Number).filter(Boolean),
-  );
+ const [selectedGenreIds, setSelectedGenreIds] = useState<string[]>(() =>
+  (searchParams.get("genreIds") || "").split(",").filter(Boolean),
+);
 
-  const latestGenresRef = useRef<string[]>(selectedGenres);
-  const latestGenreIdsRef = useRef<number[]>(selectedGenreIds);
-  latestGenresRef.current = selectedGenres;
-  latestGenreIdsRef.current = selectedGenreIds;
-  useEffect(() => {
-    const urlGenres = (searchParams.get("genres") || "")
-      .split(",")
-      .filter(Boolean);
-    const urlGenreIds = (searchParams.get("genreIds") || "")
-      .split(",")
-      .map(Number)
-      .filter(Boolean);
-    if (JSON.stringify(urlGenres) !== JSON.stringify(selectedGenres)) {
-      setSelectedGenres(urlGenres);
-      latestGenresRef.current = urlGenres;
-    }
-    if (JSON.stringify(urlGenreIds) !== JSON.stringify(selectedGenreIds)) {
-      setSelectedGenreIds(urlGenreIds);
-      latestGenreIdsRef.current = urlGenreIds;
-    }
-  }, [searchParams, selectedGenres, selectedGenreIds]);
+const latestGenresRef = useRef<string[]>(selectedGenres);
+const latestGenreIdsRef = useRef<string[]>(selectedGenreIds);
+latestGenresRef.current = selectedGenres;
+latestGenreIdsRef.current = selectedGenreIds;
+useEffect(() => {
+  const urlGenres = (searchParams.get("genres") || "")
+    .split(",")
+    .filter(Boolean);
+  const urlGenreIds = (searchParams.get("genreIds") || "")
+    .split(",")
+    .filter(Boolean); // <- sem .map(Number)
+  if (JSON.stringify(urlGenres) !== JSON.stringify(selectedGenres)) {
+    setSelectedGenres(urlGenres);
+    latestGenresRef.current = urlGenres;
+  }
+  if (JSON.stringify(urlGenreIds) !== JSON.stringify(selectedGenreIds)) {
+    setSelectedGenreIds(urlGenreIds);
+    latestGenreIdsRef.current = urlGenreIds;
+  }
+}, [searchParams, selectedGenres, selectedGenreIds]);
 
   useEffect(() => {
     const current = searchParams.get("search") || "";
@@ -354,35 +355,35 @@ export default function CatalogClient() {
   );
 
   const handleGenreToggle = useCallback(
-    (g: Genre) => {
-      if (type === "games") {
-        const current = latestGenresRef.current;
-        const next = current.includes(g.slug)
-          ? current.filter((s) => s !== g.slug)
-          : [...current, g.slug];
-        latestGenresRef.current = next;
-        setSelectedGenres(next);
-        updateParams({
-          genres: next.length ? next.join(",") : null,
-          genreIds: null,
-          page: "1",
-        });
-      } else {
-        const current = latestGenreIdsRef.current;
-        const next = current.includes(g.id)
-          ? current.filter((id) => id !== g.id)
-          : [...current, g.id];
-        latestGenreIdsRef.current = next;
-        setSelectedGenreIds(next);
-        updateParams({
-          genreIds: next.length ? next.join(",") : null,
-          genres: null,
-          page: "1",
-        });
-      }
-    },
-    [type, updateParams],
-  );
+  (g: Genre) => {
+    if (type === "games") {
+      const current = latestGenresRef.current;
+      const next = current.includes(g.slug)
+        ? current.filter((s) => s !== g.slug)
+        : [...current, g.slug];
+      latestGenresRef.current = next;
+      setSelectedGenres(next);
+      updateParams({
+        genres: next.length ? next.join(",") : null,
+        genreIds: null,
+        page: "1",
+      });
+    } else {
+      const current = latestGenreIdsRef.current;
+      const next = current.includes(g.name)
+        ? current.filter((n) => n !== g.name)
+        : [...current, g.name];
+      latestGenreIdsRef.current = next;
+      setSelectedGenreIds(next);
+      updateParams({
+        genreIds: next.length ? next.join(",") : null,
+        genres: null,
+        page: "1",
+      });
+    }
+  },
+  [type, updateParams],
+);
 
   const handleTypeChange = (newType: ContentType) => {
     latestGenresRef.current = [];
@@ -415,15 +416,15 @@ export default function CatalogClient() {
     includeAdult,
   });
 
-  const animesQuery = useAnimesCatalog({
-    page,
-    pageSize: 20,
-    search: debouncedSearch || undefined,
-    genreIds: selectedGenreIds.length ? selectedGenreIds : undefined,
-    type: animeType || undefined,
-    status: status || undefined,
-    ordering,
-  });
+ const animesQuery = useAnimesCatalog({
+  page,
+  pageSize: 20,
+  search: debouncedSearch || undefined,
+  genreIds: selectedGenreIds.length ? selectedGenreIds : undefined, // agora nomes, não ids
+  type: animeType || undefined,
+  status: status || undefined,
+  ordering,
+});
 
   const isGames = type === "games";
   const activeData = isGames ? gamesQuery.data : animesQuery.data;
@@ -452,6 +453,7 @@ export default function CatalogClient() {
 
   return (
     <div className="min-h-screen bg-background">
+       {isGames && <GamesUnavailableModal />}
       {/* Hero */}
       <div
         className={`relative overflow-hidden bg-gradient-to-br ${themeGradient} border-b border-border/50`}

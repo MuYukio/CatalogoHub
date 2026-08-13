@@ -14,6 +14,7 @@ import { useCurrentSeasonAnimes, useAnimesSearch } from "@/hooks/animes";
 import { useAuthStore } from "@/stores/auth.store";
 import type { Game, Anime } from "@/types";
 import { cn } from "@/lib/utils";
+import { GamesUnavailableModal } from "@/components/games/GamesUnavailableModal";
 
 export default function HomePage() {
   const [activeTab, setActiveTab]               = useState<"games" | "animes">("games");
@@ -188,9 +189,10 @@ export default function HomePage() {
   const isGames     = activeTab === "games";
 
   return (
+    
     <div className="min-h-screen flex flex-col bg-[#0a0a0f] text-[#f0f0f8]">
       <Header activeTab={activeTab} onTabChange={handleTabChange} />
-
+        {isGames && <GamesUnavailableModal />}
       <main className="flex-1 relative">
 
         {/* Ruído de fundo global */}

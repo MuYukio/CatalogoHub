@@ -79,6 +79,10 @@ class GameService {
   const response = await api.get('/api/Games/genres');
   return response.data;
 }
+async getApiStatus(): Promise<{ available: boolean; checkedAt: string }> {
+  const response = await api.get('/api/Games/status')
+  return response.data
+}
 }
 
 export const gamesService = new GameService()
